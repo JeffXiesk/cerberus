@@ -1,0 +1,10 @@
+# Ignore tools
+/bin
+
+# Ignore coverprofiles
+*.coverprofile
+*.tmp
+.idea
+
+deployment-data
+*.pb.go

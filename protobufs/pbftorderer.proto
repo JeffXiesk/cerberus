@@ -1,0 +1,108 @@
+syntax = "proto3";
+
+option go_package = "./;protobufs";
+
+package protobufs;
+
+import "request.proto";
+import "checkpoint.proto";
+import "common.proto";
+
+message PbftPreprepare {
+    int32 sn = 1;
+    int32 view = 2;
+    int32 leader = 3;
+    Batch batch = 4;
+    bool aborted = 5;
+    int64 ts = 6; // Timestamp to be set by the receiver at message reception.
+    int32 tn = 7;///
+    bytes tn_qc= 8;///
+    int32 skip = 9;
+    QcMessage qc_message = 10;
+    repeated HtnMessage hset = 11; ///1201set of htn messages
+    bytes hset_qc = 12; ///1201set of htn messages
+    repeated int32 Ks = 13;
+    bytes fakesig = 14;
+}
+
+message PbftPrepare {
+    int32 sn = 1;
+    int32 view = 2;
+    bytes digest = 3;
+    int32 tn = 4;
+    bytes fakesig = 5;
+}
+
+message PbftCommit {
+    int32 sn = 1;
+    int32 view = 2;
+    bytes digest = 3;
+    int64 ts = 4; // Timestamp to be set by the receiver at message reception.
+    int32 tn = 5;
+    bytes fakesig = 6;
+}
+
+//1024
+message HtnMessage {
+    int32 sn = 1;
+    int32 view = 2;
+    int32 htn = 3; // Timestamp to be set by the receiver at message reception.
+    int32 tn = 4;
+    Qc qc = 5;
+    int32 k = 6;
+    bytes prepareQc = 7;
+    bytes fakesig = 8;
+}
+
+message QcMessage {
+    int32 sn = 1;
+    int32 view = 2;
+    int32 tn = 3;
+}
+
+message Qc {
+    bytes qc = 1;
+    bytes id = 2;
+}
+
+//2023
+//message EndBlock {
+//    int32 sn = 1;   
+//}
+
+message PbftCheckpoint {
+    repeated bytes digests = 1;
+    bytes fakesig = 2;
+}
+
+// Not sent over the networ, only used internally by the PBFT instance
+message PbftCatchUp {
+}
+
+message PbftViewChange {
+    int32 view = 1;                     // new view
+    int32 h = 2;                        // latest stable checkpoitn
+    map<int32,PbftPrepare> pset = 3;    // prepared requests at previous views
+    map<int32,PbftPrepare> qset = 4;    // preprepared requests at previous views
+    repeated CheckpointMsg cset = 5;    // all available checkpoints
+    int32 sender_id = 6;                // Sender ID for convenience (not strictly needed, since it's part of the ProtocolMessage already)
+    bytes fakesig = 7;
+}
+
+message PbftMissingPreprepareRequest {
+    int32 view = 1;
+    bytes fakesig = 2;
+}
+
+message PbftMissingPreprepare {
+    PbftPreprepare preprepare = 1;
+    bytes fakesig = 2;
+}
+
+message PbftNewView {
+    int32 view = 1;
+    map<int32, SignedMsg> vset = 2;
+    map<int32, PbftPreprepare> xset = 3;
+    CheckpointMsg checkpoint = 4;
+    bytes fakesig = 5;
+}
