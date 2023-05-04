@@ -62,12 +62,3 @@ go get golang.org/x/crypto/blake2b
 
 echo "Installing the YAML parser for Go"
 go get -u gopkg.in/yaml.v2
-
-echo "Installing go-logging for Mir-BFT"
-go get -u github.com/op/go-logging
-
-echo "Installing bls"
-go get -u github.com/herumi/bls-eth-go-binary/bls
-
-echo "Installing concurrent-map"
-go get -u github.com/orcaman/concurrent-map

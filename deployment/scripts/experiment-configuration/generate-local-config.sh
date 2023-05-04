@@ -56,7 +56,7 @@ reuseFaulty=true  # If true, both correct and faulty peers will have the same ta
                   # the RandomSeed field).
 
 # Low-level system parameters
-loggingLevel="debug"
+loggingLevel="info"
 peerTag="peers"
 faultyPeerTag="faultyPeers"
 minConcurrentRequests=$((256 * 16384)) # Based on empirical data. At saturation, makes the throughput-latency plot nicely go up (as it is equivalent to may concurrent clients).
@@ -118,7 +118,7 @@ function skip() {
 }
 
 throughputsAuthPbft=$()
-throughputsAuthPbft[4]="1024 2048 4096 8192"
+throughputsAuthPbft[4]="1024 1024"
 #throughputsAuthPbft[4]="128"
 throughputsAuthPbft[8]="128 256 512 1024 2048 4096"
 throughputsAuthPbft[16]="128 256 512 1024 2048 4096 8192 12288 16384 20480"

@@ -41,34 +41,34 @@ master_command_file=$work_dir/master-commands.cmd
 # sed -i '1iexport PATH=$PATH:$GOPATH/bin' /root/.bashrc
 # sed -i '1iexport GOPATH=/root/go' /root/.bashrc
 # source /root/.bashrc
-export GOPATH=$work_dir/go
-export PATH=$PATH:$GOPATH/bin
-export PATH=$PATH:$work_dir/bin
+# export GOPATH=$work_dir/go
+# export PATH=$PATH:$GOPATH/bin
+# export PATH=$PATH:$work_dir/bin
 
 echo "INITIALZING" > $status_file
 
 echo "Changing directory to ${work_dir}"
 cd $work_dir || exit 1
 
-echo "Setting up stubborn scp."
-mkdir -p "$work_dir/bin"
-echo '#!/bin/bash
+# echo "Setting up stubborn scp."
+# mkdir -p "$work_dir/bin"
+# echo '#!/bin/bash
 
-retry_limit=$1
-shift
+# retry_limit=$1
+# shift
 
-scp "$@"
-exit_status=$?
-while [ $exit_status -ne 0 ] && [ $retry_limit -gt 0 ]; do
-  >&2 echo "scp failed. Retrying. Attempts left: $retry_limit"
-  retry_limit=$((retry_limit - 1))
-  sleep 2
-  scp "$@"
-  exit_status=$?
-done
-exit $exit_status
-' > "$work_dir/bin/stubborn-scp.sh"
-chmod u+x "$work_dir/bin/stubborn-scp.sh"
+# scp "$@"
+# exit_status=$?
+# while [ $exit_status -ne 0 ] && [ $retry_limit -gt 0 ]; do
+#   >&2 echo "scp failed. Retrying. Attempts left: $retry_limit"
+#   retry_limit=$((retry_limit - 1))
+#   sleep 2
+#   scp "$@"
+#   exit_status=$?
+# done
+# exit $exit_status
+# ' > "$work_dir/bin/stubborn-scp.sh"
+# chmod u+x "$work_dir/bin/stubborn-scp.sh"
 
 # This is a template file.
 # The variables prefixed with "ic_" need to be substituted by envsubst.
@@ -87,63 +87,60 @@ Host *
     StrictHostKeyChecking no
 ' >> ~/.ssh/config
 
-echo "Installing Ubuntu packages."
-add-apt-repository -y ppa:longsleep/golang-backports
+# echo "Installing Ubuntu packages."
+# add-apt-repository -y ppa:longsleep/golang-backports
 
-apt-get -y update
-apt-get -y install \
-	golang-go \
-	protobuf-compiler \
-	protobuf-compiler-grpc \
-	git \
-	openssl \
-	jq \
-	graphviz
+# apt-get -y update
+# apt-get -y install \
+# 	golang-go \
+# 	protobuf-compiler \
+# 	protobuf-compiler-grpc \
+# 	git \
+# 	openssl \
+# 	jq \
+# 	graphviz
 
-echo "Disabling Go modules."
-sed -i '1iexport GO111MODULE=auto' /root/.bashrc
-sed -i '1iexport GOCACHE=/root/.cache/go-build' /root/.bashrc
-sed -i '1iexport GIT_SSL_NO_VERIFY=1' /root/.bashrc
-source /root/.bashrc
-export GO111MODULE=auto
-export GOCACHE=/root/.cache/go-build
-export GIT_SSL_NO_VERIFY=1
+# echo "Disabling Go modules."
+# sed -i '1iexport GO111MODULE=auto' /root/.bashrc
+# sed -i '1iexport GOCACHE=/root/.cache/go-build' /root/.bashrc
+# sed -i '1iexport GIT_SSL_NO_VERIFY=1' /root/.bashrc
+# source /root/.bashrc
+# # export GO111MODULE=auto
+# # export GOCACHE=/root/.cache/go-build
+# # export GIT_SSL_NO_VERIFY=1
 
-echo "Installing golang packages. (May take a long time without producing output.)"
+# echo "Installing golang packages. (May take a long time without producing output.)"
 
-echo "Installing gRPC for Go."
-go get -u google.golang.org/grpc
+# echo "Installing gRPC for Go."
+# go get -u google.golang.org/grpc
 
-echo "Installing Protobufs for Go."
-go get -u github.com/golang/protobuf/protoc-gen-go
+# echo "Installing Protobufs for Go."
+# go get -u github.com/golang/protobuf/protoc-gen-go
 
-echo "Installing Zerolog for Go."
-go get -u github.com/rs/zerolog/log
+# echo "Installing Zerolog for Go."
+# go get -u github.com/rs/zerolog/log
 
-echo "Installing Linux Goprocinfo for Go"
-go get -u github.com/c9s/goprocinfo/linux
+# echo "Installing Linux Goprocinfo for Go"
+# go get -u github.com/c9s/goprocinfo/linux
 
-echo "Installing Kyber for Go"
-go get -u go.dedis.ch/kyber
-go get go.dedis.ch/fixbuf
-go get golang.org/x/crypto/blake2b
+# echo "Installing Kyber for Go"
+# go get -u go.dedis.ch/kyber
+# go get go.dedis.ch/fixbuf
+# go get golang.org/x/crypto/blake2b
 
-echo "Installing the YAML parser for Go"
-go get -u gopkg.in/yaml.v2
+# echo "Installing the YAML parser for Go"
+# go get -u gopkg.in/yaml.v2
 
-echo "Installing go-logging for Mir-BFT"
-go get -u github.com/op/go-logging
+# echo "Installing go-logging for Mir-BFT"
+# go get -u github.com/op/go-logging
 
-echo "Installing bls"
-go get -u github.com/herumi/bls-eth-go-binary/bls
+# echo "Installing bls"
+# go get -u github.com/herumi/bls-eth-go-binary/bls
 
-echo "Installing concurrent-map"
-go get -u github.com/orcaman/concurrent-map
-
-echo "Creating app folders."
-cd $GOPATH || exit 1
-mkdir -p src/github.com/JeffXiesk
-cd src/github.com/JeffXiesk || exit 1
+# echo "Creating app folders."
+# cd $GOPATH || exit 1
+# mkdir -p src/github.com/JeffXiesk
+# cd src/github.com/JeffXiesk || exit 1
 
 echo "Obtaining own IP addresses and tag."
 # Obtain public and private IP from instance detail.

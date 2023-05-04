@@ -40,7 +40,7 @@ faultyMachineLocations="sjc04 osa23 ams03 syd05 lon06 wdc07 che01 tok05 par01 da
 clients1=""    # deploys 1 client machine which run the specified number of client instances
 clients16=""    # deploys 16 client machine which run the specified number of client instances
 clients32="8"    # deploys 32 client machine which run the specified number of client instances
-systemSizes="64" # Must be sorted in ascending order!
+systemSizes="32" # Must be sorted in ascending order!
 failureCounts=(0) # For each system size, the corresponding failure count (on top of the correct nodes)
 
 StragglerCnt=(1) # Count of Straggler (Only effect when crashTimings is 'Straggler')
@@ -79,7 +79,7 @@ fixedEpochLength=false
 auths="true"
 bucketsPerLeader="16"
 minBuckets="16"
-minEpochLength="512"       # [entries]
+minEpochLength="1024"       # [entries]
 nodeConnections="1"
 minConnections="16"
 leaderPolicies="Simple"  # Possible values:
@@ -116,8 +116,8 @@ function skip() {
 }
 
 throughputsAuthPbft=$()
-throughputsAuthPbft[4]="4000"
-throughputsAuthPbft[8]="30000 40000 50000 60000"
+throughputsAuthPbft[4]="80000 100000"
+throughputsAuthPbft[8]="80000 100000 120000"
 throughputsAuthPbft[16]="30000 40000 50000 60000"
 # throughputsAuthPbft[16]="5000 10000 15000 20000 25000 30000 35000"
 # throughputsAuthPbft[16]="5000 10000 15000 20000 25000 30000 35000 40000 45000 50000"

@@ -79,7 +79,7 @@ fixedEpochLength=false
 auths="true"
 bucketsPerLeader="16"
 minBuckets="16"
-minEpochLength="512"       # [entries]
+minEpochLength="1024"       # [entries]
 nodeConnections="1"
 minConnections="16"
 leaderPolicies="Simple"  # Possible values:
@@ -116,8 +116,8 @@ function skip() {
 }
 
 throughputsAuthPbft=$()
-throughputsAuthPbft[4]="4000"
-throughputsAuthPbft[8]="30000 40000 50000 60000"
+throughputsAuthPbft[4]="80000 100000"
+throughputsAuthPbft[8]="80000 100000 120000"
 throughputsAuthPbft[16]="30000 40000 50000 60000"
 # throughputsAuthPbft[16]="5000 10000 15000 20000 25000 30000 35000"
 # throughputsAuthPbft[16]="5000 10000 15000 20000 25000 30000 35000 40000 45000 50000"

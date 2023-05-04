@@ -10,16 +10,30 @@ CREATE TABLE request_truncated as
 SELECT *
 FROM request
 WHERE
-  ts - 5000000 >= (SELECT max(t)
+  ts >= (SELECT t
     FROM (SELECT min(ts) as t
       FROM request
       WHERE event = 'REQ_FINISHED'
-      GROUP BY nodeId))
-  AND ts + 5000000 <= (SELECT min(t)
+      GROUP BY nodeId) as tb1
+    ORDER BY t
+    LIMIT 1
+    OFFSET (SELECT COUNT(*)
+            FROM (SELECT min(ts) as t
+      FROM request
+      WHERE event = 'REQ_FINISHED'
+      GROUP BY nodeId)) / 2)
+  AND ts <= (SELECT t
     FROM (SELECT max(ts) as t
       FROM request
       WHERE event = 'REQ_SEND'
-      GROUP BY nodeId))
+      GROUP BY nodeId) as tb1
+    ORDER BY t
+    LIMIT 1
+    OFFSET (SELECT COUNT(*)
+            FROM (SELECT min(ts) as t
+      FROM request
+      WHERE event = 'REQ_SEND'
+      GROUP BY nodeId)) / 2);
 
 -- Do the same as above with the protocol table.
 -- Note that the truncation times are still taken from the request table.
@@ -27,16 +41,30 @@ CREATE TABLE protocol_truncated as
 SELECT *
 FROM protocol
 WHERE
-  ts - 5000000 >= (SELECT max(t)
+  ts >= (SELECT t
     FROM (SELECT min(ts) as t
       FROM request
       WHERE event = 'REQ_FINISHED'
-      GROUP BY nodeId))
-  AND ts + 5000000 <= (SELECT min(t)
+      GROUP BY nodeId) as tb1
+    ORDER BY t
+    LIMIT 1
+    OFFSET (SELECT COUNT(*)
+            FROM (SELECT min(ts) as t
+      FROM request
+      WHERE event = 'REQ_FINISHED'
+      GROUP BY nodeId)) / 2)
+  AND ts <= (SELECT t
     FROM (SELECT max(ts) as t
       FROM request
       WHERE event = 'REQ_SEND'
-      GROUP BY nodeId))
+      GROUP BY nodeId) as tb1
+    ORDER BY t
+    LIMIT 1
+    OFFSET (SELECT COUNT(*)
+            FROM (SELECT min(ts) as t
+      FROM request
+      WHERE event = 'REQ_SEND'
+      GROUP BY nodeId)) / 2);
 
 -- Do the same as above with the CPU usage table.
 -- Note that the truncation times are still taken from the request table.
@@ -44,17 +72,30 @@ CREATE TABLE cpuusage_truncated as
 SELECT *
 FROM cpuusage
 WHERE
-            ts - 5000000 >= (SELECT max(t)
-                             FROM (SELECT min(ts) as t
-                                   FROM request
-                                   WHERE event = 'REQ_FINISHED'
-                                   GROUP BY nodeId))
-  AND ts + 5000000 <= (SELECT min(t)
-                       FROM (SELECT max(ts) as t
-                             FROM request
-                             WHERE event = 'REQ_SEND'
-                             GROUP BY nodeId))
-
+  ts >= (SELECT t
+    FROM (SELECT min(ts) as t
+      FROM request
+      WHERE event = 'REQ_FINISHED'
+      GROUP BY nodeId) as tb1
+    ORDER BY t
+    LIMIT 1
+    OFFSET (SELECT COUNT(*)
+            FROM (SELECT min(ts) as t
+      FROM request
+      WHERE event = 'REQ_FINISHED'
+      GROUP BY nodeId)) / 2)
+  AND ts <= (SELECT t
+    FROM (SELECT max(ts) as t
+      FROM request
+      WHERE event = 'REQ_SEND'
+      GROUP BY nodeId) as tb1
+    ORDER BY t
+    LIMIT 1
+    OFFSET (SELECT COUNT(*)
+            FROM (SELECT min(ts) as t
+      FROM request
+      WHERE event = 'REQ_SEND'
+      GROUP BY nodeId)) / 2)
 
 -- Total CPU usage (average over all peers), truncated data
 -- export cpu-total.val
@@ -127,9 +168,30 @@ WHERE event = 'REQ_FINISHED'
 -- End-to-end average request latency, truncated requests
 -- export latency-avg-trunc.val
 --
-SELECT avg(latency) / 1000.0
-FROM request_truncated
-WHERE event = 'REQ_FINISHED'
+select avg(r.latency) / 1000.0
+from request r
+         inner join (SELECT *
+FROM request
+where event = 'REQ_FINISHED'
+  and ts >= (select ts
+             FROM request
+             where event = 'REQ_FINISHED'
+             order by ts
+             limit 1 offset (
+                     (SELECT COUNT(*)
+                      FROM request
+                      where event = 'REQ_FINISHED') /
+                     3))
+  and ts <= (select ts
+             FROM request
+             where event = 'REQ_FINISHED'
+             order by ts
+             limit 1 offset (2 *
+                             (SELECT COUNT(*)
+                              FROM request
+                              where event = 'REQ_FINISHED') /
+                             3))) r2 on r.clSn = r2.clSn and r.nodeId = r2.nodeId
+where r.event = 'REQ_FINISHED';
 -- (avg[ms])
 
 -- Latency standard deviation, truncated requests
@@ -337,8 +399,27 @@ WHERE event = 'REQ_FINISHED'
 -- !!!!! Multiplying by 10 for sampling
 -- TODO parametrize the sumpling multiplier
 SELECT 10 * 1000000.0 * count() / (max(ts) - min(ts))
-FROM request_truncated
-WHERE event = 'REQ_FINISHED'
+FROM( SELECT *
+FROM request
+where event = 'REQ_FINISHED'
+  and ts >= (select ts
+             FROM request
+             where event = 'REQ_FINISHED'
+             order by ts
+             limit 1 offset (
+                     (SELECT COUNT(*)
+                      FROM request
+                      where event = 'REQ_FINISHED') /
+                     3))
+  and ts <= (select ts
+             FROM request
+             where event = 'REQ_FINISHED'
+             order by ts
+             limit 1 offset (2 *
+                             (SELECT COUNT(*)
+                              FROM request
+                              where event = 'REQ_FINISHED') /
+                             3)));
 -- (throughput[req/sec])
 
 -- Average batch size

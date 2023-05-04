@@ -343,9 +343,9 @@ func (ho *PbftOrderer) CheckCert(data []byte, signature []byte) error {
 	return crypto.BLSVerifySingature(membership.BLSPublicKey, data, signature)
 }
 
-// assembleCert combines validates signature shares in a threshold signature.
+// AssembleCert combines validates signature shares in a threshold signature.
 // A threshold signature form the quorum certificate.
-func (ho *PbftOrderer) assembleCert(data []byte, signatures [][]byte, ids [][]byte) ([]byte, error) {
+func (ho *PbftOrderer) AssembleCert(data []byte, signatures [][]byte, ids [][]byte) ([]byte, error) {
 	//return nil, nil
 	return crypto.BLSRecoverSignature(data, signatures, ids, 2*membership.Faults()+1, membership.NumNodes())
 }

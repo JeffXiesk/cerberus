@@ -9,6 +9,9 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/JeffXiesk/cerberus/config"
+	logger "github.com/rs/zerolog/log"
+
 	bls "github.com/herumi/bls-eth-go-binary/bls"
 )
 
@@ -105,9 +108,22 @@ func BLSRecoverSignature(msg []byte, sigShares [][]byte, keyIds [][]byte, t, n i
 	// recover sig from subSigs[K] and subIds[K]
 	var sigRecover bls.Sign
 	ids := make([]bls.ID, 0, 0)
+	// var set map[int]bool
+	set := make(map[int]bool)
 	for _, i := range keyIds {
 		var id bls.ID
 		id.Deserialize(i)
+		mark, err := strconv.Atoi(id.GetDecString())
+		if err != nil {
+			logger.Error().Msg("BLSRecoverSignature error !")
+			return []byte{}, nil
+		}
+		_, found := set[mark/config.Config.PrivKeyCnt]
+		if found {
+			return []byte{}, nil
+		}
+		set[mark/config.Config.PrivKeyCnt] = true
+		// logger.Debug().Msgf("BLSRecoverSignature: id is %s", id.GetDecString())
 		ids = append(ids, id)
 	}
 	sigs := make([]bls.Sign, 0, 0)

@@ -2,28 +2,27 @@
 # in deploy folder run.
 ssh_options_cloud='-i scripts/cloud-deploy/key/id_rsa -o StrictHostKeyChecking=no -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=60'
 
+# source shutdown_instances.sh
 num=$(python3 scripts/cloud-deploy/pyscript/find_insnum.py)
 num_arr=(`echo $num | tr ',' ' '`)
 totalnum=${num_arr[2]}
 client_num=${num_arr[0]}
 peer_num=${num_arr[1]}
-# echo $totalnum
-# echo $client_num
-# echo $peer_num
 
-region_list=("us-east-2" "ap-northeast-1" "eu-west-3" "ap-southeast-2")
-region_cnt=${#region_list[@]}
+
+
+LaunchTemplateId_list=("lt-05f49ba1063d5ec9f" "lt-003c1f1b2c37949dd" "lt-0b7b107441d1c200f" "lt-0f3679d1b3bd5dd29")
+region_cnt=${#LaunchTemplateId_list[@]}
 region_need_add_one=$(($totalnum%$region_cnt))
-LaunchTemplateId_list=("lt-xxxxxxxxxxxxxxxxx" "lt-xxxxxxxxxxxxxxxxx" "lt-xxxxxxxxxxxxxxxxx" "lt-xxxxxxxxxxxxxxxxx")
+
+echo "$region_need_add_one"
 
 if [ "$1" = "-i" ]; then
     echo "Init"
     shift
-    # Launch instance from different regions
     if [ "$1" = "-r" ]; then
         shift
-        echo "Region count is $region_cnt"
-        # echo "region_need_add_one is $region_need_add_one"
+        aws configure set region us-east-1
         for ((i=0;i<$region_cnt;i++))    
         do
             count=$(($totalnum/$region_cnt))
@@ -32,41 +31,33 @@ if [ "$1" = "-i" ]; then
                 # echo "add one"
                 count=$(($count+1))
             fi
-            echo "Region is ${region_list[$i]}, count is $count"
+            # echo "Region is ${region_list[$i]}, count is $count"
             
-            aws configure set region ${region_list[$i]}
+            # aws configure set region ${region_list[$i]}
             new_instance_info=$(aws ec2 run-instances \
              --launch-template LaunchTemplateId=${LaunchTemplateId_list[$i]} \
              --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value="Parallel-bft-instance"}]' \
              --count $count)
         done
 
-        echo "sleep 60 seconds"
-        sleep 60
+        echo "sleep 40 seconds"
+        sleep 40
     else
         sleep 0.1
     fi
 
-    public_ip=""
-    private_ip=""
-    for region in "${region_list[@]}"
-    do
-        aws configure set region $region
-        public_ip+=$(
-        aws ec2 describe-instances   \
-        --filter "Name=network-interface.status,Values=available,in-use"   \
-        --query "Reservations[*].Instances[*].PublicIpAddress"   \
-        --output=text)
-        public_ip+=" "
-        
-        private_ip+=$(
-        aws ec2 describe-instances   \
-        --filter "Name=network-interface.status,Values=available,in-use"   \
-        --query "Reservations[*].Instances[*].PrivateIpAddress"   \
-        --output=text)
-        private_ip+=" "
-    done
+    public_ip=$(
+    aws ec2 describe-instances   \
+    --filter "Name=network-interface.status,Values=available,in-use"   \
+    --query "Reservations[*].Instances[*].PublicIpAddress"   \
+    --output=text)
     
+    private_ip=$(
+    aws ec2 describe-instances   \
+    --filter "Name=network-interface.status,Values=available,in-use"   \
+    --query "Reservations[*].Instances[*].PrivateIpAddress"   \
+    --output=text)
+
     echo $public_ip
     echo $private_ip
 
@@ -81,9 +72,9 @@ if [ "$1" = "-i" ]; then
     echo $write_result
 
 
-    # set root login for none root user instance, reference : https://www.youtube.com/watch?v=xE_oaWVhaV4
     if [ "$1" = "-k" ]; then
         shift
+        # set root login, reference : https://www.youtube.com/watch?v=xE_oaWVhaV4
         echo "Start set root login..."
         for i in "${public_ip_arr[@]}"
         do
@@ -150,7 +141,6 @@ do
 done
 wait
 
-# Set low bandwidth to simulate a straggler of low bandwidth
 for ((c=0;c<$bandwidth_cnt;c++))
 do
     ssh $ssh_options_cloud root@${peer_list[c]} "tc qdisc del dev ens5 root; tc qdisc add dev ens5 root tbf rate $bandwidth_low burst 320kbit latency 100ms" &
@@ -159,7 +149,7 @@ do
 done
 wait
 
-# Start deployment
+
 if [ "$1" = "-d" ]; then
     shift
     echo "Start deployment..."
@@ -167,23 +157,34 @@ if [ "$1" = "-d" ]; then
     echo "End deployment..."
 fi
 
-# Shutdown all instance 
+# for ((c=0;c<$peer_num;c++)) do
+#     ssh $ssh_options_cloud root@${public_ip_arr[c+bandwidth_cnt]} 'tc qdisc del dev ens5 root'
+# done
+# echo 'unsetting bandwidth'
+
+# rm -rf scripts/cloud-deploy/experiment-output
+# mkdir -p scripts/cloud-deploy/experiment-output
+
+# echo "fetch result from client and peer"
+# for i in "${public_ip_arr[@]:1:totalnum}"
+# do
+#     scp $ssh_options_cloud root@$i:/root/experiment-output-* scripts/cloud-deploy/experiment-output
+#     echo "$i fetch experiment done..."
+# done
+
+# python3 scripts/cloud-deploy/Fairness_process/latency_each_stage.py >> scripts/cloud-deploy/Fairness_process/data_analyze.log
+
+
+
+
+
 if [ "$1" = "-sd" ]; then
     shift
-    for i in "${region_list[@]}" ; do
-        aws configure set region $i
-        aws ec2 terminate-instances --instance-ids $(aws ec2 describe-instances --query "Reservations[].Instances[].InstanceId" --output text)
-        # scripts/cloud-deploy/shutdown_instances.sh
-    done
+    aws ec2 terminate-instances --instance-ids $(aws ec2 describe-instances --query "Reservations[].Instances[].InstanceId" --output text)
 fi
 
-# Stop all instance 
 if [ "$1" = "-st" ]; then
     shift
-    for i in "${region_list[@]}" ; do
-        aws configure set region $i
-        aws ec2 stop-instances --instance-ids $(aws ec2 describe-instances --query "Reservations[].Instances[].InstanceId" --output text)
-        # scripts/cloud-deploy/shutdown_instances.sh
-    done
+    aws ec2 stop-instances --instance-ids $(aws ec2 describe-instances --query "Reservations[].Instances[].InstanceId" --output text)
 fi
 # scp -r -i scripts/cloud-deploy/key/id_rsa -o StrictHostKeyChecking=no -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=60 root@35.180.54.180:/root/experiment-output .

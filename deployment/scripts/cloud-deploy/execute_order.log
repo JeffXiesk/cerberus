@@ -1,0 +1,473 @@
+======
+source scripts/cloud-deploy/deploy-cloud.sh -b 3 30 -d
+Not init
+3
+30mbit
+setting bandwidth
+18.119.119.134 1000mbit
+3.17.181.16 1000mbit
+3.145.179.229 1000mbit
+13.58.116.96 1000mbit
+18.183.87.24 1000mbit
+3.112.254.39 1000mbit
+13.231.144.28 1000mbit
+13.114.236.46 1000mbit
+15.188.146.37 1000mbit
+15.236.133.54 1000mbit
+13.39.104.137 1000mbit
+15.188.23.111 1000mbit
+13.236.183.141 1000mbit
+13.236.137.209 1000mbit
+52.65.209.129 1000mbit
+13.236.178.215 1000mbit
+18.119.119.134 30mbit
+3.17.181.16 30mbit
+3.145.179.229 30mbit
+Start deployment...
+Using experiment data directory: deployment-data/remote-0004
+Generated 4 experiments.
+Using deployment file: deployment-data/remote-0004/deployment.dpl
+Using instance info file: scripts/cloud-deploy/cloud-instance-info
+       Master IP address: 18.218.226.136
+Killing everything that is alive and pruning state on the remote machines (including SSH) and removing potential bandwidth limit.
+
+Killed continuous analysis scripts.
+
+
+ Reset machine state.
+
+Waiting for deployment process and result fetching to finish.
+For progress on experiment result fetching, see deployment-data/remote-0004/result-fetching.log.
+Deploying slaves: 16 16clients
+Deploying slave at public IP 3.144.103.128 (client) tagged 16clients
+Deploying slave at public IP 3.138.101.240 (client) tagged 16clients
+Deploying slave at public IP 3.141.7.148 (client) tagged 16clients
+Deploying slave at public IP 3.145.91.228 (client) tagged 16clients
+Deploying slave at public IP 3.145.46.81 (client) tagged 16clients
+Deploying slave at public IP 18.191.154.113 (client) tagged 16clients
+Deploying slave at public IP 3.145.38.195 (client) tagged 16clients
+Deploying slave at public IP 18.219.203.144 (client) tagged 16clients
+Deploying slave at public IP 18.181.193.24 (client) tagged 16clients
+Deploying slave at public IP 35.77.92.191 (client) tagged 16clients
+Deploying slave at public IP 35.77.89.100 (client) tagged 16clients
+Deploying slave at public IP 18.183.166.172 (client) tagged 16clients
+Deploying slave at public IP 3.113.13.38 (client) tagged 16clients
+Deploying slave at public IP 13.115.79.7 (client) tagged 16clients
+Deploying slave at public IP 54.250.52.63 (client) tagged 16clients
+Deploying slave at public IP 13.231.234.206 (client) tagged 16clients
+Deploying slaves: 16 16extraclients
+Deploying slave at public IP 13.38.44.181 (client) tagged 16extraclients
+Deploying slave at public IP 35.180.132.136 (client) tagged 16extraclients
+Deploying slave at public IP 13.38.14.200 (client) tagged 16extraclients
+Deploying slave at public IP 35.180.124.6 (client) tagged 16extraclients
+sending incremental file list
+Deploying slave at public IP 15.237.36.71 (client) tagged 16extraclients
+Deploying slave at public IP 15.236.134.85 (client) tagged 16extraclients
+run-protoc.sh
+            239 100%    0.00kB/s    0:00:00              239 100%    0.00kB/s    0:00:00 (xfr#1, to-chk=156/157)
+announcer/
+announcer/announcer.go
+          1,096 100%    1.05MB/s    0:00:00            1,096 100%    1.05MB/s    0:00:00 (xfr#2, to-chk=135/157)
+checkpoint/
+checkpoint/checkpointer.go
+          2,258 100%    2.15MB/s    0:00:00            2,258 100%    2.15MB/s    0:00:00 (xfr#3, to-chk=134/157)
+checkpoint/common.go
+          1,463 100%    1.40MB/s    0:00:00            1,463 100%    1.40MB/s    0:00:00 (xfr#4, to-chk=133/157)
+checkpoint/signingcheckpointer.go
+         10,377 100%    9.90MB/s    0:00:00           10,377 100%    9.90MB/s    0:00:00 (xfr#5, to-chk=132/157)
+checkpoint/simplecheckpointer.go
+          6,733 100%    6.42MB/s    0:00:00            6,733 100%    6.42MB/s    0:00:00 (xfr#6, to-chk=131/157)
+cmd/
+cmd/contentiontest/
+cmd/contentiontest/main.go
+         17,748 100%    8.46MB/s    0:00:00           17,748 100%    8.46MB/s    0:00:00 (xfr#7, to-chk=122/157)
+cmd/discoverymaster/
+cmd/discoverymaster/main.go
+          3,166 100%    1.01MB/s    0:00:00            3,166 100%    1.01MB/s    0:00:00 (xfr#8, to-chk=121/157)
+cmd/discoveryslave/
+cmd/discoveryslave/main.go
+          8,103 100%    2.58MB/s    0:00:00            8,103 100%    2.58MB/s    0:00:00 (xfr#9, to-chk=120/157)
+cmd/grpctest/
+cmd/grpctest/main.go
+          8,029 100%    2.55MB/s    0:00:00            8,029 100%    2.55MB/s    0:00:00 (xfr#10, to-chk=119/157)
+cmd/oldmirdiscovery/
+cmd/oldmirdiscovery/main.go
+          2,908 100%  946.61kB/s    0:00:00            2,908 100%  946.61kB/s    0:00:00 (xfr#11, to-chk=118/157)
+cmd/orderingclient/
+cmd/orderingclient/client.go
+         24,259 100%    5.78MB/s    0:00:00           24,259 100%    5.78MB/s    0:00:00 (xfr#12, to-chk=117/157)
+cmd/orderingclient/localclient.go
+          6,212 100%    1.48MB/s    0:00:00            6,212 100%    1.48MB/s    0:00:00 (xfr#13, to-chk=116/157)
+cmd/orderingclient/main.go
+          3,393 100%  828.37kB/s    0:00:00            3,393 100%  828.37kB/s    0:00:00 (xfr#14, to-chk=115/157)
+cmd/orderingpeer/
+cmd/orderingpeer/main.go
+          9,204 100%    1.76MB/s    0:00:00            9,204 100%    1.76MB/s    0:00:00 (xfr#15, to-chk=114/157)
+cmd/playground/
+cmd/playground/main.go
+         20,796 100%    3.97MB/s    0:00:00           20,796 100%    3.97MB/s    0:00:00 (xfr#16, to-chk=113/157)
+config/
+config/config.go
+         11,564 100%    1.84MB/s    0:00:00           11,564 100%    1.84MB/s    0:00:00 (xfr#17, to-chk=112/157)
+config/config.yml
+          9,767 100%    1.55MB/s    0:00:00            9,767 100%    1.55MB/s    0:00:00 (xfr#18, to-chk=111/157)
+crypto/
+crypto/bls.go
+          4,951 100%  805.83kB/s    0:00:00            4,951 100%  690.71kB/s    0:00:00 (xfr#19, to-chk=110/157)
+crypto/bls_test.go
+          4,410 100%  615.23kB/s    0:00:00            4,410 100%  615.23kB/s    0:00:00 (xfr#20, to-chk=109/157)
+crypto/crypto.go
+          5,897 100%  822.68kB/s    0:00:00            5,897 100%  822.68kB/s    0:00:00 (xfr#21, to-chk=108/157)
+crypto/ecdsa.go
+          2,440 100%  340.40kB/s    0:00:00            2,440 100%  340.40kB/s    0:00:00 (xfr#22, to-chk=107/157)
+crypto/tbls.go
+          7,587 100%  926.15kB/s    0:00:00            7,587 100%  926.15kB/s    0:00:00 (xfr#23, to-chk=106/157)
+crypto/tbls_test.go
+          7,125 100%  869.75kB/s    0:00:00            7,125 100%  869.75kB/s    0:00:00 (xfr#24, to-chk=105/157)
+discovery/
+discovery/client.go
+          3,172 100%  387.21kB/s    0:00:00            3,172 100%  387.21kB/s    0:00:00 (xfr#25, to-chk=104/157)
+discovery/const.go
+          1,100 100%  119.36kB/s    0:00:00            1,100 100%  119.36kB/s    0:00:00 (xfr#26, to-chk=103/157)
+discovery/master.go
+         12,726 100%    1.35MB/s    0:00:00           12,726 100%    1.35MB/s    0:00:00 (xfr#27, to-chk=102/157)
+discovery/rpcs.go
+         12,260 100%    1.17MB/s    0:00:00           12,260 100%    1.17MB/s    0:00:00 (xfr#28, to-chk=101/157)
+discovery/server.go
+          7,682 100%  750.20kB/s    0:00:00            7,682 100%  750.20kB/s    0:00:00 (xfr#29, to-chk=100/157)
+log/
+log/entry.go
+            996 100%   97.27kB/s    0:00:00              996 100%   97.27kB/s    0:00:00 (xfr#30, to-chk=99/157)
+log/log.go
+         11,686 100%    1.01MB/s    0:00:00           11,686 100%    1.01MB/s    0:00:00 (xfr#31, to-chk=98/157)
+log/log_test.go
+          3,685 100%  327.15kB/s    0:00:00            3,685 100%  327.15kB/s    0:00:00 (xfr#32, to-chk=97/157)
+manager/
+manager/contiguoussegment.go
+          2,010 100%  178.44kB/s    0:00:00            2,010 100%  163.57kB/s    0:00:00 (xfr#33, to-chk=96/157)
+manager/dummymanager.go
+          9,701 100%  789.47kB/s    0:00:00            9,701 100%  789.47kB/s    0:00:00 (xfr#34, to-chk=95/157)
+manager/leaderpolicies.go
+          7,904 100%  643.23kB/s    0:00:00            7,904 100%  643.23kB/s    0:00:00 (xfr#35, to-chk=94/157)
+manager/manager.go
+          4,773 100%  388.43kB/s    0:00:00            4,773 100%  388.43kB/s    0:00:00 (xfr#36, to-chk=93/157)
+manager/mirmanager.go
+         20,414 100%    1.50MB/s    0:00:00           20,414 100%    1.39MB/s    0:00:00 (xfr#37, to-chk=92/157)
+manager/segment.go
+          2,089 100%  145.72kB/s    0:00:00            2,089 100%  145.72kB/s    0:00:00 (xfr#38, to-chk=91/157)
+manager/skippingsegment.go
+          2,173 100%  151.58kB/s    0:00:00            2,173 100%  151.58kB/s    0:00:00 (xfr#39, to-chk=90/157)
+membership/
+membership/membership.go
+          5,370 100%  374.58kB/s    0:00:00            5,370 100%  349.61kB/s    0:00:00 (xfr#40, to-chk=89/157)
+messenger/
+messenger/clients.go
+         12,768 100%  831.25kB/s    0:00:00           12,768 100%  831.25kB/s    0:00:00 (xfr#41, to-chk=88/157)
+messenger/peerconnection.go
+         12,566 100%  766.97kB/s    0:00:00           12,566 100%  766.97kB/s    0:00:00 (xfr#42, to-chk=87/157)
+messenger/peers.go
+         21,503 100%    1.28MB/s    0:00:00           21,503 100%    1.21MB/s    0:00:00 (xfr#43, to-chk=86/157)
+messenger/tls.go
+          3,070 100%  176.36kB/s    0:00:00            3,070 100%  176.36kB/s    0:00:00 (xfr#44, to-chk=85/157)
+oldmir/
+oldmir/oldmir-key
+          2,602 100%  149.47kB/s    0:00:00            2,602 100%  149.47kB/s    0:00:00 (xfr#45, to-chk=84/157)
+oldmir/oldmir-key.pub
+            570 100%   32.74kB/s    0:00:00              570 100%   32.74kB/s    0:00:00 (xfr#46, to-chk=83/157)
+oldmir/oldmir-start.sh
+          1,743 100%  100.13kB/s    0:00:00            1,743 100%   94.56kB/s    0:00:00 (xfr#47, to-chk=82/157)
+orderer/
+orderer/README.md
+          6,213 100%  337.08kB/s    0:00:00            6,213 100%  337.08kB/s    0:00:00 (xfr#48, to-chk=81/157)
+orderer/common.go
+          5,587 100%  303.11kB/s    0:00:00            5,587 100%  303.11kB/s    0:00:00 (xfr#49, to-chk=80/157)
+orderer/dummyorderer.go
+          6,995 100%  359.53kB/s    0:00:00            6,995 100%  359.53kB/s    0:00:00 (xfr#50, to-chk=79/157)
+orderer/hotstuffbacklog.go
+          1,644 100%   84.50kB/s    0:00:00            1,644 100%   84.50kB/s    0:00:00 (xfr#51, to-chk=78/157)
+orderer/hotstuffinstance.go
+         29,660 100%    1.41MB/s    0:00:00           29,660 100%    1.41MB/s    0:00:00 (xfr#52, to-chk=77/157)
+orderer/hotstufforderer.go
+          7,092 100%  329.80kB/s    0:00:00            7,092 100%  329.80kB/s    0:00:00 (xfr#53, to-chk=76/157)
+orderer/instance.go
+            812 100%   37.76kB/s    0:00:00              812 100%   37.76kB/s    0:00:00 (xfr#54, to-chk=75/157)
+orderer/orderer.go
+          3,030 100%  140.90kB/s    0:00:00            3,030 100%  140.90kB/s    0:00:00 (xfr#55, to-chk=74/157)
+orderer/pbftbacklog.go
+          1,666 100%   73.95kB/s    0:00:00            1,666 100%   73.95kB/s    0:00:00 (xfr#56, to-chk=73/157)
+orderer/pbftinstance.go
+         32,768  32%    1.36MB/s    0:00:00          101,437 100%    3.72MB/s    0:00:00 (xfr#57, to-chk=72/157)
+orderer/pbftorderer.go
+         11,764 100%  425.49kB/s    0:00:00           11,764 100%  425.49kB/s    0:00:00 (xfr#58, to-chk=71/157)
+orderer/raftinstance.go
+         26,381 100%  920.10kB/s    0:00:00           26,381 100%  920.10kB/s    0:00:00 (xfr#59, to-chk=70/157)
+orderer/raftorderer.go
+          6,371 100%  222.20kB/s    0:00:00            6,371 100%  222.20kB/s    0:00:00 (xfr#60, to-chk=69/157)
+profiling/
+profiling/cpuusage.go
+          3,537 100%  123.36kB/s    0:00:00            3,537 100%  119.11kB/s    0:00:00 (xfr#61, to-chk=68/157)
+profiling/profiling.go
+          4,880 100%  164.33kB/s    0:00:00            4,880 100%  164.33kB/s    0:00:00 (xfr#62, to-chk=67/157)
+protobufs/
+protobufs/checkpoint.pb.go
+          7,818 100%  263.27kB/s    0:00:00            7,818 100%  263.27kB/s    0:00:00 (xfr#63, to-chk=66/157)
+protobufs/checkpoint.proto
+            249 100%    8.38kB/s    0:00:00              249 100%    8.38kB/s    0:00:00 (xfr#64, to-chk=65/157)
+protobufs/common.pb.go
+          7,527 100%  245.02kB/s    0:00:00            7,527 100%  245.02kB/s    0:00:00 (xfr#65, to-chk=64/157)
+protobufs/common.proto
+            226 100%    7.36kB/s    0:00:00              226 100%    7.36kB/s    0:00:00 (xfr#66, to-chk=63/157)
+protobufs/contentiontest.pb.go
+         23,711 100%  746.94kB/s    0:00:00           23,711 100%  746.94kB/s    0:00:00 (xfr#67, to-chk=62/157)
+protobufs/contentiontest.proto
+            666 100%   20.98kB/s    0:00:00              666 100%   20.98kB/s    0:00:00 (xfr#68, to-chk=61/157)
+protobufs/discovery.pb.go
+         32,768  60% 1000.00kB/s    0:00:00           53,817 100%    1.60MB/s    0:00:00 (xfr#69, to-chk=60/157)
+protobufs/discovery.proto
+          3,041 100%   92.80kB/s    0:00:00            3,041 100%   92.80kB/s    0:00:00 (xfr#70, to-chk=59/157)
+protobufs/dummyorderer.pb.go
+          4,965 100%  146.93kB/s    0:00:00            4,965 100%  146.93kB/s    0:00:00 (xfr#71, to-chk=58/157)
+protobufs/dummyorderer.proto
+            169 100%    5.00kB/s    0:00:00              169 100%    5.00kB/s    0:00:00 (xfr#72, to-chk=57/157)
+protobufs/hotstufforderer.pb.go
+Deploying slave at public IP 13.39.162.17 (client) tagged 16extraclients
+         16,272 100%  467.37kB/s    0:00:00           16,272 100%  467.37kB/s    0:00:00 (xfr#73, to-chk=56/157)
+protobufs/hotstufforderer.proto
+            731 100%   21.00kB/s    0:00:00              731 100%   21.00kB/s    0:00:00 (xfr#74, to-chk=55/157)
+protobufs/messenger.pb.go
+         32,768  67%  914.29kB/s    0:00:00           48,340 100%    1.28MB/s    0:00:00 (xfr#75, to-chk=54/157)
+protobufs/messenger.proto
+          1,983 100%   53.79kB/s    0:00:00            1,983 100%   53.79kB/s    0:00:00 (xfr#76, to-chk=53/157)
+protobufs/nodeidentity.pb.go
+          5,844 100%  158.53kB/s    0:00:00            5,844 100%  150.19kB/s    0:00:00 (xfr#77, to-chk=52/157)
+protobufs/nodeidentity.proto
+            225 100%    5.78kB/s    0:00:00              225 100%    5.78kB/s    0:00:00 (xfr#78, to-chk=51/157)
+protobufs/pbftorderer.pb.go
+         32,768  74%  820.51kB/s    0:00:00           44,239 100%    1.05MB/s    0:00:00 (xfr#79, to-chk=50/157)
+protobufs/pbftorderer.proto
+          2,461 100%   60.08kB/s    0:00:00            2,461 100%   60.08kB/s    0:00:00 (xfr#80, to-chk=49/157)
+protobufs/raftorderer.pb.go
+         16,290 100%  388.00kB/s    0:00:00           16,290 100%  388.00kB/s    0:00:00 (xfr#81, to-chk=48/157)
+protobufs/raftorderer.proto
+          1,336 100%   31.82kB/s    0:00:00            1,336 100%   31.82kB/s    0:00:00 (xfr#82, to-chk=47/157)
+protobufs/request.pb.go
+         24,198 100%  562.64kB/s    0:00:00           24,198 100%  562.64kB/s    0:00:00 (xfr#83, to-chk=46/157)
+protobufs/request.proto
+            947 100%   22.02kB/s    0:00:00              947 100%   22.02kB/s    0:00:00 (xfr#84, to-chk=45/157)
+protobufs/testservice.pb.go
+         10,130 100%  230.06kB/s    0:00:00           10,130 100%  230.06kB/s    0:00:00 (xfr#85, to-chk=44/157)
+protobufs/testservice.proto
+            281 100%    6.38kB/s    0:00:00              281 100%    6.38kB/s    0:00:00 (xfr#86, to-chk=43/157)
+request/
+request/batch.go
+          6,620 100%  150.35kB/s    0:00:00            6,620 100%  146.93kB/s    0:00:00 (xfr#87, to-chk=42/157)
+request/bucket.go
+         16,226 100%  360.13kB/s    0:00:00           16,226 100%  360.13kB/s    0:00:00 (xfr#88, to-chk=41/157)
+request/bucketgroup.go
+         10,174 100%  220.79kB/s    0:00:00           10,174 100%  211.39kB/s    0:00:00 (xfr#89, to-chk=40/157)
+request/buffer.go
+          7,864 100%  159.99kB/s    0:00:00            7,864 100%  159.99kB/s    0:00:00 (xfr#90, to-chk=39/157)
+request/request.go
+         15,039 100%  299.72kB/s    0:00:00           15,039 100%  299.72kB/s    0:00:00 (xfr#91, to-chk=38/157)
+request/requesthandler.go
+          3,583 100%   71.41kB/s    0:00:00            3,583 100%   71.41kB/s    0:00:00 (xfr#92, to-chk=37/157)
+request/responder.go
+          2,517 100%   50.16kB/s    0:00:00            2,517 100%   49.16kB/s    0:00:00 (xfr#93, to-chk=36/157)
+statetransfer/
+statetransfer/statetransfer.go
+          6,465 100%  126.27kB/s    0:00:00            6,465 100%  126.27kB/s    0:00:00 (xfr#94, to-chk=35/157)
+tls-data/
+tls-data/auth.csr
+          1,765 100%   34.47kB/s    0:00:00            1,765 100%   34.47kB/s    0:00:00 (xfr#95, to-chk=34/157)
+tls-data/auth.key
+          3,268 100%   62.58kB/s    0:00:00            3,268 100%   62.58kB/s    0:00:00 (xfr#96, to-chk=33/157)
+tls-data/auth.pem
+          1,883 100%   36.06kB/s    0:00:00            1,883 100%   36.06kB/s    0:00:00 (xfr#97, to-chk=32/157)
+tls-data/ca.key
+          3,243 100%   62.10kB/s    0:00:00            3,243 100%   62.10kB/s    0:00:00 (xfr#98, to-chk=31/157)
+tls-data/ca.pem
+          1,862 100%   35.65kB/s    0:00:00            1,862 100%   35.65kB/s    0:00:00 (xfr#99, to-chk=30/157)
+tls-data/ca.srl
+             41 100%    0.77kB/s    0:00:00               41 100%    0.77kB/s    0:00:00 (xfr#100, to-chk=29/157)
+tls-data/client-ecdsa-224.csr
+            513 100%    9.63kB/s    0:00:00              513 100%    9.63kB/s    0:00:00 (xfr#101, to-chk=28/157)
+tls-data/client-ecdsa-224.key
+            221 100%    4.15kB/s    0:00:00              221 100%    4.15kB/s    0:00:00 (xfr#102, to-chk=27/157)
+tls-data/client-ecdsa-224.pem
+          1,245 100%   23.38kB/s    0:00:00            1,245 100%   23.38kB/s    0:00:00 (xfr#103, to-chk=26/157)
+tls-data/client-ecdsa-256.csr
+            538 100%    9.91kB/s    0:00:00              538 100%    9.91kB/s    0:00:00 (xfr#104, to-chk=25/157)
+tls-data/client-ecdsa-256.key
+            241 100%    4.44kB/s    0:00:00              241 100%    4.44kB/s    0:00:00 (xfr#105, to-chk=24/157)
+tls-data/client-ecdsa-256.pem
+          1,261 100%   23.23kB/s    0:00:00            1,261 100%   23.23kB/s    0:00:00 (xfr#106, to-chk=23/157)
+tls-data/client-ecdsa-384.csr
+            623 100%   11.48kB/s    0:00:00              623 100%   11.48kB/s    0:00:00 (xfr#107, to-chk=22/157)
+tls-data/client-ecdsa-384.key
+            306 100%    5.53kB/s    0:00:00              306 100%    5.53kB/s    0:00:00 (xfr#108, to-chk=21/157)
+tls-data/client-ecdsa-384.pem
+          1,302 100%   23.55kB/s    0:00:00            1,302 100%   23.55kB/s    0:00:00 (xfr#109, to-chk=20/157)
+tls-data/client-rsa-2048.csr
+          1,074 100%   19.42kB/s    0:00:00            1,074 100%   19.42kB/s    0:00:00 (xfr#110, to-chk=19/157)
+tls-data/client-rsa-2048.key
+          1,704 100%   30.82kB/s    0:00:00            1,704 100%   30.82kB/s    0:00:00 (xfr#111, to-chk=18/157)
+tls-data/client-rsa-2048.pem
+          1,537 100%   27.29kB/s    0:00:00            1,537 100%   27.29kB/s    0:00:00 (xfr#112, to-chk=17/157)
+tls-data/client-rsa-4096.csr
+          1,765 100%   31.34kB/s    0:00:00            1,765 100%   31.34kB/s    0:00:00 (xfr#113, to-chk=16/157)
+tls-data/client-rsa-4096.key
+          3,276 100%   57.13kB/s    0:00:00            3,276 100%   57.13kB/s    0:00:00 (xfr#114, to-chk=15/157)
+tls-data/client-rsa-4096.pem
+          1,883 100%   32.84kB/s    0:00:00            1,883 100%   32.84kB/s    0:00:00 (xfr#115, to-chk=14/157)
+tls-data/generate-auth.sh
+          1,518 100%   26.47kB/s    0:00:00            1,518 100%   26.47kB/s    0:00:00 (xfr#116, to-chk=13/157)
+tls-data/generate-ca.sh
+            867 100%   14.85kB/s    0:00:00              867 100%   14.85kB/s    0:00:00 (xfr#117, to-chk=12/157)
+tls-data/generate-client.sh
+          2,938 100%   47.82kB/s    0:00:00            2,938 100%   47.82kB/s    0:00:00 (xfr#118, to-chk=11/157)
+tls-data/generate.sh
+            498 100%    8.11kB/s    0:00:00              498 100%    8.11kB/s    0:00:00 (xfr#119, to-chk=10/157)
+tls-data/openssl-local.conf
+            291 100%    4.66kB/s    0:00:00              291 100%    4.66kB/s    0:00:00 (xfr#120, to-chk=9/157)
+tls-data/openssl.conf
+            291 100%    4.66kB/s    0:00:00              291 100%    4.66kB/s    0:00:00 (xfr#121, to-chk=8/157)
+tls-data/plot-timeline.py
+          2,080 100%   33.30kB/s    0:00:00            2,080 100%   32.76kB/s    0:00:00 (xfr#122, to-chk=7/157)
+tracing/
+tracing/bufferedtrace.go
+          9,889 100%  155.76kB/s    0:00:00            9,889 100%  155.76kB/s    0:00:00 (xfr#123, to-chk=6/157)
+tracing/directtrace.go
+          4,109 100%   64.72kB/s    0:00:00            4,109 100%   63.69kB/s    0:00:00 (xfr#124, to-chk=5/157)
+tracing/event.go
+          1,802 100%   27.93kB/s    0:00:00            1,802 100%   27.93kB/s    0:00:00 (xfr#125, to-chk=4/157)
+tracing/trace.go
+          2,050 100%   31.78kB/s    0:00:00            2,050 100%   31.78kB/s    0:00:00 (xfr#126, to-chk=3/157)
+tracing/tracing.go
+          1,349 100%   20.58kB/s    0:00:00            1,349 100%   20.58kB/s    0:00:00 (xfr#127, to-chk=2/157)
+util/
+util/channelbuffer.go
+          2,451 100%   37.40kB/s    0:00:00            2,451 100%   37.40kB/s    0:00:00 (xfr#128, to-chk=1/157)
+validator/
+validator/validator.go
+            763 100%   11.64kB/s    0:00:00              763 100%   11.64kB/s    0:00:00 (xfr#129, to-chk=0/157)
+Deploying slave at public IP 13.38.76.212 (client) tagged 16extraclients
+Deploying slave at public IP 52.65.122.41 (client) tagged 16extraclients
+Deploying slave at public IP 3.27.119.234 (client) tagged 16extraclients
+Deploying slave at public IP 13.239.57.210 (client) tagged 16extraclients
+Deploying slave at public IP 54.252.152.113 (client) tagged 16extraclients
+Deploying slave at public IP 3.106.117.77 (client) tagged 16extraclients
+Deploying slave at public IP 3.106.165.145 (client) tagged 16extraclients
+Deploying slave at public IP 54.252.69.210 (client) tagged 16extraclients
+Deploying slave at public IP 52.65.219.144 (client) tagged 16extraclients
+Deploying slaves: 16 peers
+All slaves started. waiting for them to finish.
+Deploying slave at public IP 18.119.119.134 (p1) tagged peers
+Deploying slave at public IP 3.17.181.16 (p2) tagged peers
+Deploying slave at public IP 3.145.179.229 (p3) tagged peers
+Deploying slave at public IP 13.58.116.96 (p4) tagged peers
+Deploying slave at public IP 18.183.87.24 (p5) tagged peers
+Deploying slave at public IP 3.112.254.39 (p6) tagged peers
+Deploying slave at public IP 13.231.144.28 (p7) tagged peers
+Deploying slave at public IP 13.114.236.46 (p8) tagged peers
+Deploying slave at public IP 15.188.146.37 (p9) tagged peers
+Deploying slave at public IP 15.236.133.54 (p10) tagged peers
+Deploying slave at public IP 13.39.104.137 (p11) tagged peers
+Deploying slave at public IP 15.188.23.111 (p12) tagged peers
+Deploying slave at public IP 13.236.183.141 (p13) tagged peers
+Deploying slave at public IP 13.236.137.209 (p14) tagged peers
+Deploying slave at public IP 52.65.209.129 (p15) tagged peers
+Deploying slave at public IP 13.236.178.215 (p16) tagged peers
+sending incremental file list
+config-0000-faulty.yml
+          9,094 100%    0.00kB/s    0:00:00            9,094 100%    0.00kB/s    0:00:00 (xfr#1, to-chk=7/8)
+config-0000.yml
+          9,095 100%    8.67MB/s    0:00:00            9,095 100%    8.67MB/s    0:00:00 (xfr#2, to-chk=6/8)
+config-0001-faulty.yml
+          9,094 100%    8.67MB/s    0:00:00            9,094 100%    8.67MB/s    0:00:00 (xfr#3, to-chk=5/8)
+config-0001.yml
+          9,095 100%    8.67MB/s    0:00:00            9,095 100%    8.67MB/s    0:00:00 (xfr#4, to-chk=4/8)
+config-0002-faulty.yml
+          9,094 100%    8.67MB/s    0:00:00            9,094 100%    8.67MB/s    0:00:00 (xfr#5, to-chk=3/8)
+config-0002.yml
+          9,095 100%    4.34MB/s    0:00:00            9,095 100%    4.34MB/s    0:00:00 (xfr#6, to-chk=2/8)
+config-0003-faulty.yml
+          9,094 100%    4.34MB/s    0:00:00            9,094 100%    4.34MB/s    0:00:00 (xfr#7, to-chk=1/8)
+config-0003.yml
+          9,095 100%    2.89MB/s    0:00:00            9,095 100%    2.89MB/s    0:00:00 (xfr#8, to-chk=0/8)
+sending incremental file list
+scripts/analyze/analyze.sh
+            700  25%    0.00kB/s    0:00:00            2,799 100%    2.00MB/s    0:00:00 (xfr#1, to-chk=54/90)
+scripts/cloud-deploy/deploy_multiple.sh
+            608 100%  593.75kB/s    0:00:00              608 100%  593.75kB/s    0:00:00 (xfr#2, to-chk=33/90)
+scripts/cloud-deploy/execute_order.log
+          1,901   7%    1.81MB/s    0:00:00           24,275 100%   23.15MB/s    0:00:00 (xfr#3, to-chk=32/90)
+scripts/experiment-configuration/generate-config-1.sh
+            700   2%  683.59kB/s    0:00:00           29,858 100%   28.47MB/s    0:00:00 (xfr#4, to-chk=13/90)
+scripts/experiment-configuration/generate-config-2.sh
+            700   2%  683.59kB/s    0:00:00           29,858 100%   14.24MB/s    0:00:00 (xfr#5, to-chk=12/90)
+scripts/experiment-configuration/generate-config.sh
+            700   2%  341.80kB/s    0:00:00           29,858 100%   14.24MB/s    0:00:00 (xfr#6, to-chk=10/90)
+Changing directory to /root
+Installing private ssh key for cloud machine.
+Disabling SSH's strict host key checking to enable non-interactive git clones over ssh.
+Obtaining own IP addresses and tag.
+Local instance info:
+Public IP: 
+Private IP: 
+Tag: 
+
+Generating CA key.
+
+Generating CA self-signed certificate.
+Adding IP address to certificate alt names IP.3: 18.218.226.136
+
+Generating key and certificate: client-rsa-2048.key, client-rsa-2048.pem
+
+Generating key: client-rsa-2048.key
+
+Generating certificate signing request (CSR): client-rsa-2048.csr
+
+Generating certificate: client-rsa-2048.pem
+
+Generating key and certificate: client-rsa-4096.key, client-rsa-4096.pem
+
+Generating key: client-rsa-4096.key
+
+Generating certificate signing request (CSR): client-rsa-4096.csr
+
+Generating certificate: client-rsa-4096.pem
+
+Generating key and certificate: client-ecdsa-224.key, client-ecdsa-224.pem
+
+Generating key: client-ecdsa-224.key
+
+Generating certificate signing request (CSR): client-ecdsa-224.csr
+
+Generating certificate: client-ecdsa-224.pem
+
+Generating key and certificate: client-ecdsa-256.key, client-ecdsa-256.pem
+
+Generating key: client-ecdsa-256.key
+
+Generating certificate signing request (CSR): client-ecdsa-256.csr
+
+Generating certificate: client-ecdsa-256.pem
+
+Generating key and certificate: client-ecdsa-384.key, client-ecdsa-384.pem
+
+Generating key: client-ecdsa-384.key
+
+Generating certificate signing request (CSR): client-ecdsa-384.csr
+
+Generating certificate: client-ecdsa-384.pem
+
+Generating key and certificate: auth.key, auth.pem
+Adding IP address to certificate alt names IP.3: 18.218.226.136
+
+Generating key: auth.key
+
+Generating certificate signing request (CSR): auth.csr
+
+Generating certificate: auth.pem
+Compiling ISS.
+Starting result processor and master server.

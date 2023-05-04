@@ -29,35 +29,35 @@ config_file="$work_dir/go/src/github.com/JeffXiesk/$git_directory/config/config.
 # sed -i '1iexport PATH=$PATH:/root/bin' /root/.bashrc
 # sed -i '1iexport PATH=$PATH:$GOPATH/bin' /root/.bashrc
 # sed -i '1iexport GOPATH=/root/go' /root/.bashrc
-source /root/.bashrc
-export GOPATH=$work_dir/go
-export PATH=$PATH:$GOPATH/bin
-export PATH=$PATH:$work_dir/bin
+# source /root/.bashrc
+# export GOPATH=$work_dir/go
+# export PATH=$PATH:$GOPATH/bin
+# export PATH=$PATH:$work_dir/bin
 
 echo "INITIALZING" > $status_file
 
 echo "Changing directory to ${work_dir}"
 cd $work_dir || exit 1
 
-echo "Setting up stubborn scp."
-mkdir -p "$work_dir/bin"
-echo '#!/bin/bash
+# echo "Setting up stubborn scp."
+# mkdir -p "$work_dir/bin"
+# echo '#!/bin/bash
 
-retry_limit=$1
-shift
+# retry_limit=$1
+# shift
 
-scp "$@"
-exit_status=$?
-while [ $exit_status -ne 0 ] && [ $retry_limit -gt 0 ]; do
-  >&2 echo "scp failed. Retrying. Attempts left: $retry_limit"
-  retry_limit=$((retry_limit - 1))
-  sleep 2
-  scp "$@"
-  exit_status=$?
-done
-exit $exit_status
-' > "$work_dir/bin/stubborn-scp.sh"
-chmod u+x "$work_dir/bin/stubborn-scp.sh"
+# scp "$@"
+# exit_status=$?
+# while [ $exit_status -ne 0 ] && [ $retry_limit -gt 0 ]; do
+#   >&2 echo "scp failed. Retrying. Attempts left: $retry_limit"
+#   retry_limit=$((retry_limit - 1))
+#   sleep 2
+#   scp "$@"
+#   exit_status=$?
+# done
+# exit $exit_status
+# ' > "$work_dir/bin/stubborn-scp.sh"
+# chmod u+x "$work_dir/bin/stubborn-scp.sh"
 
 # This is a template file.
 # The following variables (on the right-hand side of the assignments) need to be substituted by envsubst.
@@ -79,16 +79,16 @@ echo "INSTALLING" > $status_file
 
 echo "Installing Ubuntu packages."
 
-apt-get -y update
-apt-get -y install \
-	git \
-	openssl \
-	jq \
-	graphviz
+# apt-get -y update
+# apt-get -y install \
+# 	git \
+# 	openssl \
+# 	jq \
+# 	graphviz
 
-echo "Creating app folders."
-mkdir -p $GOPATH/src/github.com/JeffXiesk || exit 1
-cd $GOPATH/src/github.com/JeffXiesk || exit 1
+# echo "Creating app folders."
+# mkdir -p $GOPATH/src/github.com/JeffXiesk || exit 1
+# cd $GOPATH/src/github.com/JeffXiesk || exit 1
 
 echo "Obtaining own public IP address."
 # Obtain public and private IP from instance detail.

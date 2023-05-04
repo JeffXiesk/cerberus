@@ -10,12 +10,12 @@ CREATE TABLE request_truncated as
 SELECT *
 FROM request
 WHERE
-  ts - 5000000 >= (SELECT max(t)
+  ts - 2000000 >= (SELECT max(t)
     FROM (SELECT min(ts) as t
       FROM request
       WHERE event = 'REQ_FINISHED'
       GROUP BY nodeId))
-  AND ts + 5000000 <= (SELECT min(t)
+  AND ts + 2000000 <= (SELECT min(t)
     FROM (SELECT max(ts) as t
       FROM request
       WHERE event = 'REQ_SEND'
@@ -27,12 +27,12 @@ CREATE TABLE protocol_truncated as
 SELECT *
 FROM protocol
 WHERE
-  ts - 5000000 >= (SELECT max(t)
+  ts - 2000000 >= (SELECT max(t)
     FROM (SELECT min(ts) as t
       FROM request
       WHERE event = 'REQ_FINISHED'
       GROUP BY nodeId))
-  AND ts + 5000000 <= (SELECT min(t)
+  AND ts + 2000000 <= (SELECT min(t)
     FROM (SELECT max(ts) as t
       FROM request
       WHERE event = 'REQ_SEND'
@@ -44,12 +44,12 @@ CREATE TABLE cpuusage_truncated as
 SELECT *
 FROM cpuusage
 WHERE
-  ts - 5000000 >= (SELECT max(t)
+  ts - 2000000 >= (SELECT max(t)
     FROM (SELECT min(ts) as t
       FROM request
       WHERE event = 'REQ_FINISHED'
       GROUP BY nodeId))
-  AND ts + 5000000 <= (SELECT min(t)
+  AND ts + 2000000 <= (SELECT min(t)
     FROM (SELECT max(ts) as t
       FROM request
       WHERE event = 'REQ_SEND'

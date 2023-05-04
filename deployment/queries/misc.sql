@@ -62,3 +62,4 @@ FROM request_truncated
 WHERE event = 'REQ_FINISHED'
 GROUP BY clId
 -- (clId, count[req], time[sec], throughput[req/sec])
+
