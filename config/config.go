@@ -1,205 +1,163 @@
-// Copyright 2022 IBM Corp. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+Copyright IBM Corp. 2021 All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+		 http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 
 package config
 
 import (
-	"github.com/rs/zerolog"
-	logger "github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v2"
-
 	"io/ioutil"
-	"time"
+
+	"github.com/op/go-logging"
+	"gopkg.in/yaml.v2"
 )
 
+var log = logging.MustGetLogger("server-main")
+var format = logging.MustStringFormatter(
+	`%{time:15:04:05.000000} %{shortfunc} %{message}`,
+)
 var Config configuration
 
+// TODO check if we can parse int to uint64
 type configuration struct {
-	LoggingLevelStr string `yaml:"Logging"`
-	LoggingLevel    zerolog.Level
+	Id int `yaml:"id"`
+	N  int `yaml:"n"` // number of servers
+	F  int `yaml:"f"` // number of byzantine servers tolerated
+	D  int `yaml:"d"` // number of dispatchers per node
 
-	UseTLS bool `yaml:"UseTLS"` // Use TLS for both peer-to-peer and client-to-peer communication.
+	Logging string `yaml:"logging"`
+	ChainId string `yaml:"chainId"`
+	Ledger  string `yaml:"ledger"` // persistent storage path
 
-	// The 3 options below are ignored if UseTLS is set to false.
-	CACertFile            string `yaml:"CACertFile"`
-	KeyFile               string `yaml:"KeyFile"`
-	CertFile              string `yaml:"CertFile"`
-	BasicConnections      int    `yaml:"PriorityConnections"`   // Number of parallel connections between 2 peers.
-	PriorityConnections   int    `yaml:"BasicConnections"`      // Number of parallel priority connections between 2 peers
-	TestConnections       bool   `yaml:"TestConnections"`       // Enable testing of connections before the actual experiment starts.
-	ExcessConnections     int    `yaml:"ExcessConnections"`     // Number of extra connections to open when choosing the fastest ones. Those connections will be closed after the test.
-	ConnectionTestMsgs    int    `yaml:"ConnectionTestMsgs"`    // Number of messages to use for testing a single connection.
-	ConnectionTestPayload int    `yaml:"ConnectionTestPayload"` // Number of bytes in the payload of each connection test message.
-	OutMessageBufSize     int    `yaml:"OutMessageBufsize"`     // Buffer size of channels used for outgoing messages. If 0, no channels are used.
-	OutMessageBatchPeriod int    `yaml:"OutMessageBatchPeriod"` // Batching period of outgoing non-priority messages to each peer.
-	ThroughputCap         int    `yaml:"ThroughputCap"`         // Batches are not cut faster than at this rate (system-wide).
-	StragglerTolerance    int    `yaml:"StragglerTolerance"`
-	BatchSizeIncrement    int    `yaml:"BatchSizeIncrement"`
+	MaxLeaders        int  `yaml:"maxLeaders"`        // max leaderset size, set to 1 to emulate PBFT
+	BatchDurationNsec int  `yaml:"batchDurationNsec"` // timeout to cut a batch in nanoseconds
+	BatchSizeBytes    int  `yaml:"batchSizeBytes"`    // batch size in bytes
+	EpochTimeoutNsec  int  `yaml:"epochTimeoutNsec"`  // epoch change time out in nanoseconds
+	BatchSignature    bool `yaml:"batchSignature"`    // batch signatures on commit messages
 
-	// Startup config
-	Orderer           string `yaml:"Orderer"`
-	Manager           string `yaml:"Manager"`
-	Checkpointer      string `yaml:"Checkpointer"`
-	Failures          int    `yaml:"Failures"`
-	StragglerCnt      int    `yaml:"StragglerCnt"`
-	PrivKeyCnt        int    `yaml:"PrivKeyCnt"`
-	UseSig            bool   `yaml:"UseSig"`
-	CrashTiming       string `yaml:"CrashTiming"`
-	RandomSeed        int64  `yaml:"RandomSeed"`
-	NodeToLeaderRatio int    `yaml:"NodeToLeaderRatio"`
+	WatermarkDist        int `yaml:"watermarkDist"`        // low to high watermaks distance in number of batches
+	CheckpointDist       int `yaml:"checkpointDist"`       // checkpoint distance in number of batches
+	BucketRotationPeriod int `yaml:"bucketRotationPeriod"` // max epoch size in recovery & bucket rotation period in stable mode
+	ClientWatermarkDist  int `yaml:"clientWatermarkDist"`  // number of parallel requests per client
+	Buckets              int `yaml:"buckets"`              // buckets per leader
 
-	// Dummy Manager Config
-	CheckpointInterval  int `yaml:"CheckpointInterval"`  // The checkpointing protocol is triggered each checkpointInterval of contiguously committed sequence numbers.
-	WatermarkWindowSize int `yaml:"WatermarkWindowSize"` // The number of "in-flight" sequence numbers.
-	// I.e., the maximum difference between the first uncommitted sequence number and the last sequence number for which
-	// a value can be proposed, plus 1.
-	// Mir Manager Config
-	EpochLength        int  `yaml:"EpochLength"`
-	SegmentLength      int  `yaml:"SegmentLength"`
-	WaitForCheckpoints bool `yaml:"WaitForCheckpoints"`
+	// Optimizations
+	PayloadSharding bool `yaml:"payloadSharding"` // light total order broadcast
+	SigSharding     bool `yaml:"sigSharding"`     // request signature verification sharding
 
-	// Request Buffer Config
-	ClientWatermarkWindowSize int `yaml:"ClientWatermarkWindowSize"`
-	ClientRequestBacklogSize  int `yaml:"ClientRequestBacklogSize"` // The number of requests beyond client's current window that are backlogged.
+	// Byzantine behavior
+	ByzantineDuplication bool `yaml:"byzantineDuplication"` // if true nodes do not filter out preprepared or delivered requests
+	Censoring            int  `yaml:"censoring"`            // the percentage of requests a malicious node drops [0..100]
+	ByzantineDelay       int  `yaml:"byzantineDelay"`       // time added to batch timeout in nanoseconds
+	ByzantineAfter       int  `yaml:"byzantineAfter"`       // Adding Byzantine delay for sequence numbers greater or equal to ByzantineAfter
+	ByzantineUntil       int  `yaml:"byzantineUntil"`       // Adding Byzantine delay for sequence numbers lees than ByzantineUntil
 
-	// Manager config
-	LeaderPolicy     string `yaml:"LeaderPolicy"`
-	DefaultLeaderBan int    `yaml:"DefaultLeaderBan"`
+	// Network Configuration
+	UseTLS                 bool `yaml:"useTLS"` // Use TLS for both peer-to-peer and client-to-peer communication
+	ServerConnectionBuffer int  `yaml:"serverConnectionBuffer"`	// seconds servers need to wait for each other to connect
+	SignatureVerification  bool `yaml:"signatureVerification"` // request signature verification
 
-	// Orderer config
-	NumBuckets     int           `yaml:"NumBuckets"`
-	BatchSize      int           `yaml:"BatchSize"` // Maximum number of requests per batch
-	BatchTimeoutMs int           `yaml:"BatchTimeout"`
-	BatchTimeout   time.Duration // Timeout (ms) to cut batch when the bucket has less requests than the BatchSize.
+	// Requests load
+	RequestSize     int `yaml:"requestSize"`
+	MaxRequestCount int `yaml:"maxRequestCount"` // Requests generated locally, at the server
 
-	// PBFT Instance config
-	DisabledViewChange  bool          `yaml:"DisabledViewChange"`
-	ViewChangeTimeoutMs int           `yaml:"ViewChangeTimeout"`
-	ViewChangeTimeout   time.Duration // Timeout (ns) to start a view change when an instance is not progressing.
+	// Parameters that define request rate
+	RequestsPerClient int `yaml:"requestsPerClient"` // Total number of requests the client submits is RequestsPerClient
+	Parallelism       int `yaml:"parallelism"`       // Number of requests send in parallel per instance
+	RequestRate       int `yaml:"requestRate"`       // Max request rate per client, in requests per second
+	Clients           int `yaml:"clients"`           // Number of client instances
+	ClientRunTime     int `yaml:"clientRunTime"`     // Timeout for client to submit all its requests, in milliseconds. Set to 0 for no timeout.
 
-	// Tracing
-	EventBufferSize     int `yaml:"EventBufferSize"`     // Capacity of the tracing event buffer, in number of events.
-	TraceSampling       int `yaml:"TraceSampling"`       // Only trace one out of TraceSampling events.
-	ClientTraceSampling int `yaml:"ClientTraceSampling"` // Only trace one out of TraceSampling events.
+	// Client broadcast parameters
+	Blocking    bool `yaml:"blocking"`    // Set to true for the client to wait command line input before starting
+	Receivers   int  `yaml:"receivers"`   // Number of leaders client sends requests to
+	Broadcast   bool `yaml:"broadcast"`   // If true send requests to Receivers servers estimating which server has an active bucket per request
+	Destination int  `yaml:"destination"` // If communication is dedicated
 
-	// Client configuration
-	ClientsPerProcess    int    `yaml:"ClientsPerProcess"`    // Number of concurrent clients in the orderingclient process (running as separate threads).
-	RequestsPerClient    int    `yaml:"RequestsPerClient"`    // Number of requests each client submits.
-	ClientRunTime        int    `yaml:"ClientRunTime"`        // Timeout for client to submit all its requests, in milliseconds. Set to 0 for no timeout.
-	RequestRate          int    `yaml:"RequestRate"`          // Max request rate per client, in requests per second.
-	HardRequestRateLimit bool   `yaml:"HardRequestRateLimit"` // Never exceed rate limit or temporarily increase rate to catch up.
-	RequestPayloadSize   int    `yaml:"RequestPayloadSize"`   // Size of the (randomly generated) request payload in bytes.
-	SignRequests         bool   `yaml:"SignRequests"`
-	VerifyRequestsEarly  bool   `yaml:"VerifyRequestsEarly"` // Verify request signatures before adding them to the bucket.
-	ClientPubKeyFile     string `yaml:"ClientPubKeyFile"`    // Key for client request verification.
-	ClientPrivKeyFile    string `yaml:"ClientPrivKeyFile"`   // Key for client request verification.
-	PrecomputeRequests   bool   `yaml:"PrecomputeRequests"`  // Pre-compute (and sign, if applicable) all requests at a client before starting to submit.
-
-	// System parameters
-	RequestHandlerThreads     int    `yaml:"RequestHandlerThreads"` // Number of threads that write incoming requests to request Buffers.
-	RequestInputChannelBuffer int    `yaml:"RequestInputChannelBuffer"`
-	BatchVerifier             string `yaml:"BatchVerifier"`
+	// TLS connection parameters
+	Self struct {
+		Listen     string `yaml:"listen"`
+		CACertFile string `yaml:"caCertFile"`
+		KeyFile    string `yaml:"keyFile"`
+		CertFile   string `yaml:"certFile"`
+	}
+	Servers struct {
+		CACertFile string   `yaml:"caCertFile"`
+		CertFiles  []string `yaml:"certFiles"`
+		Addresses  []string `yaml:"addresses"`
+	}
 }
 
 func LoadFile(configFileName string) {
 	f, err := ioutil.ReadFile(configFileName)
 
 	if err != nil {
-		logger.Fatal().Err(err).Str("configFileName", configFileName).Msg("Could not read config file.")
+		log.Fatalf("Could not read config file %s", configFileName)
 	}
 
 	err = yaml.Unmarshal(f, &Config)
 	if err != nil {
-		logger.Fatal().Err(err).Str("configFileName", configFileName).Msg("Could not unmarshal config file.")
+		log.Fatalf("Could not unmarshal config file %s: %s", configFileName, err.Error())
 	}
 
-	logger.Debug().Str("Logging", Config.LoggingLevelStr).Msg("Config")
-	logger.Debug().Bool("UseTLS", Config.UseTLS).Msg("Config")
-	logger.Debug().Str("CACertFile", Config.CACertFile).Msg("Config")
-	logger.Debug().Str("KeyFile", Config.KeyFile).Msg("Config")
-	logger.Debug().Str("CertFile", Config.CertFile).Msg("Config")
-	logger.Debug().Int("PriorityConnections", Config.PriorityConnections).Msg("Config")
-	logger.Debug().Int("BasicConnections", Config.BasicConnections).Msg("Config")
-	logger.Debug().Bool("TestConnections", Config.TestConnections).Msg("Config")
-	logger.Debug().Int("ExcessConnections", Config.ExcessConnections).Msg("Config")
-	logger.Debug().Int("ConnectionTestMsgs", Config.ConnectionTestMsgs).Msg("Config")
-	logger.Debug().Int("ConnectionTestPayload", Config.ConnectionTestPayload).Msg("Config")
-	logger.Debug().Int("OutMessageBufsize", Config.OutMessageBufSize).Msg("Config")
-	logger.Debug().Int("OutMessageBufsize", Config.OutMessageBatchPeriod).Msg("Config")
-	logger.Debug().Int("ThroughputCap", Config.ThroughputCap).Msg("Config")
-	logger.Debug().Int("StragglerTolerance", Config.StragglerTolerance).Msg("Config")
-	logger.Debug().Int("BatchSizeIncrement", Config.BatchSizeIncrement).Msg("Config")
-	logger.Debug().Str("Orderer", Config.Orderer).Msg("Config")
-	logger.Debug().Str("Manager", Config.Manager).Msg("Config")
-	logger.Debug().Int("Failures", Config.Failures).Msg("Config")
-	logger.Debug().Int("StragglerCnt", Config.StragglerCnt).Msg("Config")
-	logger.Debug().Int("PrivKeyCnt", Config.PrivKeyCnt).Msg("Config")
-	logger.Debug().Bool("UseSig", Config.UseSig).Msg("Config")
-	logger.Debug().Str("CrashTiming", Config.CrashTiming).Msg("Config")
-	logger.Debug().Int("CheckpointInterval", Config.CheckpointInterval).Msg("Config")
-	logger.Debug().Int("WatermarkWindowSize", Config.WatermarkWindowSize).Msg("Config")
-	logger.Debug().Int("EpochLength", Config.EpochLength).Msg("Config")
-	logger.Debug().Int("SegmentLength", Config.SegmentLength).Msg("Config")
-	logger.Debug().Bool("WaitForCheckpoints", Config.WaitForCheckpoints).Msg("Config")
-	logger.Debug().Int("ClientWatermarkWindowSize", Config.ClientWatermarkWindowSize).Msg("Config")
-	logger.Debug().Int("ClientRequestBacklogSize", Config.ClientRequestBacklogSize).Msg("Config")
-	logger.Debug().Int64("RandomSeed", Config.RandomSeed).Msg("Config")
-	logger.Debug().Int("NodeToLeaderRatio", Config.NodeToLeaderRatio).Msg("Config")
-	logger.Debug().Str("LeaderPolicy", Config.LeaderPolicy).Msg("Config")
-	logger.Debug().Int("DefaultLeaderBan", Config.DefaultLeaderBan).Msg("Config")
-	logger.Debug().Int("NumBuckets", Config.NumBuckets).Msg("Config")
-	logger.Debug().Int("BatchSize", Config.BatchTimeoutMs).Msg("Config")
-	logger.Debug().Bool("DisabledViewChange", Config.DisabledViewChange).Msg("Config")
-	logger.Debug().Int("ViewChangeTimeout", Config.ViewChangeTimeoutMs).Msg("Config")
-	logger.Debug().Int("ClientTraceSampling", Config.ClientTraceSampling).Msg("Config")
-	logger.Debug().Int("EventBufferSize", Config.EventBufferSize).Msg("Config")
-	logger.Debug().Int("TraceSampling", Config.TraceSampling).Msg("Config")
-	logger.Debug().Int("ClientsPerProcess", Config.ClientsPerProcess).Msg("Config")
-	logger.Debug().Int("RequestsPerClient", Config.RequestsPerClient).Msg("Config")
-	logger.Debug().Int("ClientRunTime", Config.ClientRunTime).Msg("Config")
-	logger.Debug().Int("RequestRate", Config.RequestRate).Msg("Config")
-	logger.Debug().Bool("HardRequestRateLimit", Config.HardRequestRateLimit).Msg("Config")
-	logger.Debug().Int("RequestPayloadSize", Config.RequestPayloadSize).Msg("Config")
-	logger.Debug().Bool("SignRequests", Config.SignRequests).Msg("Config")
-	logger.Debug().Str("ClientPrivKeyFile", Config.ClientPrivKeyFile).Msg("Config")
-	logger.Debug().Str("ClientPubKeyFile", Config.ClientPubKeyFile).Msg("Config")
-	logger.Debug().Bool("PrecomputeRequests", Config.PrecomputeRequests).Msg("Config")
-	logger.Debug().Int("RequestHandlerThreads", Config.RequestHandlerThreads).Msg("Config")
-	logger.Debug().Int("RequestInputChannelBuffer", Config.RequestInputChannelBuffer).Msg("Config")
-	logger.Debug().Str("BatchVerifier", Config.BatchVerifier).Msg("Config")
-
-	Config.LoggingLevel = setLoggingLevel(Config.LoggingLevelStr)
-
-	Config.BatchTimeout = time.Duration(Config.BatchTimeoutMs) * time.Millisecond
-	Config.ViewChangeTimeout = time.Duration(Config.ViewChangeTimeoutMs) * time.Millisecond
-
-}
-
-func setLoggingLevel(level string) zerolog.Level {
-	switch level {
-	case "trace":
-		return zerolog.TraceLevel
-	case "debug":
-		return zerolog.DebugLevel
-	case "info":
-		return zerolog.InfoLevel
-	case "warning":
-		return zerolog.WarnLevel
-	case "error":
-		return zerolog.ErrorLevel
-	default:
-		logger.Fatal().Msg("Unsupported logging level")
+	log.Debugf("Id: %d", Config.Id)
+	log.Debugf("N: %d", Config.N)
+	log.Debugf("F: %d", Config.F)
+	log.Debugf("D: %d", Config.D)
+	log.Debugf("Logging: %s", Config.Logging)
+	log.Debugf("ChainId: %s", Config.ChainId)
+	log.Debugf("Ledger: %s", Config.Ledger)
+	log.Debugf("MaxLeaders: %d", Config.MaxLeaders)
+	log.Debugf("BatchDurationNsec: %d", Config.BatchDurationNsec)
+	log.Debugf("BatchSizeBytes: %d", Config.BatchSizeBytes)
+	log.Debugf("EpochTimeoutNsec: %d", Config.EpochTimeoutNsec)
+	log.Debugf("BatchSignature: %t", Config.BatchSignature)
+	log.Debugf("WatermarkDist: %d", Config.WatermarkDist)
+	log.Debugf("CheckpointDist: %d", Config.CheckpointDist)
+	log.Debugf("BucketRotationPeriod: %d", Config.BucketRotationPeriod)
+	log.Debugf("ClientWatermarkDist: %d", Config.ClientWatermarkDist)
+	log.Debugf("Buckets: %d", Config.Buckets)
+	log.Debugf("PayloadSharding: %t", Config.PayloadSharding)
+	log.Debugf("SigSharding: %t", Config.SigSharding)
+	log.Debugf("ByzantineDuplication: %t", Config.ByzantineDuplication)
+	log.Debugf("Censoring: %d", Config.Censoring)
+	log.Debugf("ByzantineDelay: %d", Config.Censoring)
+	log.Debugf("ByzantineAfter: %d", Config.ByzantineAfter)
+	log.Debugf("ByzantineUntil: %d", Config.ByzantineUntil)
+	log.Debugf("UseTLS: %t", Config.UseTLS)
+	log.Debugf("ServerConfigurationBuffer: %d", Config.ServerConnectionBuffer)
+	log.Debugf("SignatureVerification: %t", Config.SignatureVerification)
+	log.Debugf("RequestSize: %d", Config.RequestSize)
+	log.Debugf("RequestsPerClient: %d", Config.RequestsPerClient)
+	log.Debugf("Parallelism: %d", Config.Parallelism)
+	log.Debugf("RequestRate: %d", Config.RequestRate)
+	log.Debugf("ClientRunTime: %d", Config.ClientRunTime)
+	log.Debugf("Clients: %d", Config.Clients)
+	log.Debugf("Blocking: %t", Config.Blocking)
+	log.Debugf("Receivers: %d", Config.Receivers)
+	log.Debugf("Destination: %d", Config.Destination)
+	log.Debugf("Self:")
+	log.Debugf("    Listen: %s", Config.Self.Listen)
+	log.Debugf("    CACertFile: %s", Config.Self.CACertFile)
+	log.Debugf("    KeyFile: %s", Config.Self.KeyFile)
+	log.Debugf("    CertFile: %s", Config.Self.CertFile)
+	log.Debugf("Servers:")
+	log.Debugf("    CACertFile: %s", Config.Servers.CACertFile)
+	for _, cert := range Config.Servers.CertFiles {
+		log.Debugf("    CertFile: %s", cert)
 	}
-	return zerolog.NoLevel
+	for _, addr := range Config.Servers.Addresses {
+		log.Debugf("    CertFile: %s", addr)
+	}
 }

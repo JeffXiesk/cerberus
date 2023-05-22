@@ -1,10 +1,5 @@
-# Ignore tools
-/bin
-
-# Ignore coverprofiles
-*.coverprofile
-*.tmp
 .idea
-
-deployment-data
+.DS_Store
+*.out
+*.trc
 *.pb.go

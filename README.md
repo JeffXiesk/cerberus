@@ -1,145 +1,293 @@
-# High-Performance and Secure Multi-BFT Consensus via Dynamic Global Ordering (Cerberus)
+# MirBFT Research Prototype
+The implementation for  [Mir-BFT: High-Throughput Robust BFT for Decentralized Networks
+](https://arxiv.org/abs/1906.05552) paper, (peer-reviewed Journal of Systems Research (JSYS) snapshot of the paper is available [here](https://escholarship.org/uc/item/36g369xq)).
 
-### ABSTRACT
-In Multi-BFT consensus, multiple leader-based consensus instances, e.g., PBFT or HotStuff, run in parallel, circumventing the leader bottleneck of a single instance. Despite the improved performance, the Multi-BFT consensus has an Achilles’ heel: the need to globally order output blocks across instances. Deriving this global ordering is challenging because it must cope with different rates at which blocks are produced by different instances, and simultaneously, it must respect inter-block causality constraints for security. In prior Multi-BFT designs, each block is assigned a global index before creation, leading to poor performance and causality violations. We propose Cerberus, a high-performance and secure Multi-BFT protocol that considers varying block rates of instances while ensuring block causality. Our key idea is to dynamically order consensus results across instances. First, the dynamic ordering decouples the dependencies between the replicas’ partial logs to ensure fast generation of the global log. This eliminates blocking on slow instances. Second, blocks are ordered by their generation sequence, which respects inter-block causality. To this end, we assign monotonic ranks to the output blocks of instances for global ordering. We further pipeline these monotonic ranks with the consensus process and aggregate signature to reduce protocol overhead. We implemented and evaluated Cerberus by initializing consensus instances with PBFT. Our evaluation shows that Cerberus improves the peak throughput of ISS, a state-of-the-art Multi-BFT design, by 6x and reduces transaction latency of ISS by 94%, when deployed with one straggling replica out of 32 replicas in WAN.
+The deployment has been tested on x86 machines running Ubuntu 20.04
+The commands should be run on bash shell.
 
+The remote deployment has been tested on IBM cloud and on AWS.
 
-### Cerberus is implemented based on [ISS](https://github.com/hyperledger-labs/mirbft)'s implementation from Hyperledger-labs. Detail deployment setup please see ISS's doc below.
-
-
-___
-
-# Insanely Scalable State-Machine Replication (ISS)
-
-This is a modular framework for implementing, deploying and testing a distributed ordering service.
-The main task of such a service is maintaining a totally ordered _Log_ of client _Requests_.
-This implementation uses multiple instances of an ordering protocol and multiplexes their outputs into the final _Log_.
-The ordering protocol instances running on each peer are orchestrated by a _Manager_ module that decides which instance
-is responsible for which part of the _Log_, when to execute a checkpoint protocol and which client requests are to be
-ordered by which ordering instance. The decisions of the _Manager_ must be consistent across all peers.
-
-The _Log_ is a sequence of _Entries_. Each _Entry_ has a _sequence number_ (_SN_) defining its position in the _Log_,
-and contains a _Batch_ of _Requests_.
-The _Log_ is logically partitioned into _Segments_ - parts of the _Log_ attributed to a single instance of an ordering
-protocol. It is the _Manager_'s task to create these _Segments_ and to instantiate the ordering protocol for each
-created _Segment_.
-
-The set of all possible client _Requests_ is partitioned (based on their hashes) into subsets called _Buckets_.
-The manager assigns a _Bucket_ to each _Segment_ it creates. The ordering protocol instance ordering that _Segment_
-only creates batches of _Requests_ using the assigned _Bucket_. It is the _Manager_'s task to create _Segments_ and
-assign _Buckets_ in a way ensuring that no two _Segments_ that are being ordered concurrently are assigned the same
-_Bucket_. This is required to prevent request duplication.
-
-The _Manager_ observes the _Log_ and creates new _Segments_ as the _Log_ fills up.
-When the _Manager_ creates a new _Segment_, it triggers the _Orderer_ that orders the _Segment_.
-Ordering a _Segment_ means committing new _Entries_ with the _SNs_ of that _Segment_.
-Periodically, the _Manager_ triggers the _Checkpointer_ to create checkpoints of the _Log_.
-The _Manager_ observes the created checkpoints and issues new _Segments_ as the checkpoints advance, respecting the
-_watermark window_.
+**IMPORTANT NOTES**: 
+* Make sure that the network configuration allows *all* inbound and outbound network communication on *all* ports.<br />
+  * For AWS, first create a security group and add an inbound network rule to enable this.
+* Private IPs are not reachable by default for an AWS deployment across different regions.
+Configure your VPC [accordingly](https://docs.aws.amazon.com/devicefarm/latest/developerguide/amazon-vpc-cross-region.html) or use only public network interfaces by using the machines' public IP addresses in place of the private ones in the configuration file (see details below).
 
 
-## Installation
-### Cloning the repository
-Create a GOPATH directory and make sure you are the owner of it:
+## Local Deployment
+Download and run the script `setup.sh` which can be found in the deployment directory:<br />
+`source setup.sh` <br />
 
-`sudo mkdir -p /opt/gopath/`
+The script installs Golang 17.2 and all other dependencies.
 
-`sudo chown -R $user:$group  /opt/gopath/`
+Then it clones this repository under the path: <br />
+`/opt/gopath/src/github.com/IBM/mirbft`
 
-where `$user` and `$group` your user and group respectively.
+It checks out the `research` branch and, finally, builds the `client` and `server` executables under
+`/opt/gopath/src/github.com/IBM/mirbftsever` and `/opt/gopath/src/github.com/IBM/mirbft/client`
+respectively.
 
-Create a directory to clone the repository into:
-
-`mkdir -p /opt/gopath/src/github.com/JeffXiesk/`
-
-Clone this repository unter the directory you created:
-
-`cd /opt/gopath/src/github.com/JeffXiesk/`
-
-`git clone https://github.com/JeffXiesk/cerberus.git`
-
-Checkout the`research-iss` branch.
-
-### Installing Dependencies
-With `/opt/gopath/src/github.com/JeffXiesk/cerberus` as working directory, go to the deployment directory:
-
-`cd deployment`
-
-Configure the `user` and `group` in `vars.sh`
-
-To install Golang and requirements: 
-
-`source scripts/install-local.sh`
-
-**NOTE**: The `install-local.sh` script, among other dependencies, installs `Go` in the home directory, sets GOPATH to `/opt/gopath/bin/` and edits `~/.bashrc`.
-
-The default path to the repository is set to: `/opt/gopath/src/github.com/JeffXiesk/cerberus/`.
+**NOTE**: The script installs `Go` in the home directory, sets GOPATH to `/opt/gopath/bin/` and edits `~/.bashrc`.
 
 
-### ISS Installation
-The `run-protoc.sh` script needs to be run from the project root directory (i.e. `mirbft`) before compiling the Go
-files. 
+### Running with a sample configuration
+A server sample configuration exists in `sampleconfig/serverconfig/` .
 
-**IMPORTANT**: go modules are not supported. Disable with the command: `export GO111MODULE=off` before installation.
+A client sample configuration exists in `sampleconfig/clientconfig/`.
 
-Compile and install the go code by running `go install ./...` from the project root directory.
+#### 4 servers - 1 client
+To start locally a setup with 4 server and 1 client:
+
+On each server:
+
+`cd /opt/gopath/src/github.com/IBM/mirbft/server`
+
+`./server ../sampleconfig/serverconfig/config$id.yml server$id 2>&1 | tee server-$id.out`
+where `$id` is `1 2 3 4` for each of the 4 server.
+
+The first argument is the path to the server configuration and the second argument a name prefix for a trace file.
+
+The command writes the logs of the server to a `server-$id.out` file.
+
+On the client:
+
+`cd /opt/gopath/src/github.com/IBM/mirbft/client`
+
+`./client ../sampleconfig/clientconfig/4peer-config.yml client`
+
+Again, the first argument is the path to the server configuration and the second argument a name prefix for a trace file.
 
 
-## Deployment & Permformance Metrics
-Detailed instructions can be found  [here](https://github.com/JeffXiesk/cerberus/tree/research-iss/deployment).
+#### 1 server - 1 client
+
+On the server:
+
+`cd /opt/gopath/src/github.com/IBM/mirbft/server`
+
+`./server ../sampleconfig/serverconfig/config.yml server 2>&1 | tee server.out`
+
+The command writes the logs of the server to a `server.out` file.
 
 
-## Glossary of terms 
+On the client:
 
-### Batch
-An ordered sequence of client _Requests_. All _Requests_ in a _Batch_ must belong to the same _Bucket_. The _Batch_ is
-defined in the `request` package.
+`cd /opt/gopath/src/github.com/IBM/mirbft/client`
 
-### Bucket
-A subset of all possible client _Requests_. Each _Request_ maps to exactly one _Bucket_ (mapping is based on the
-_Request_'s hash). The _Manager_ assigns one _Bucket_ to each _Segment_ and the _Orderer_ of the _Segment_ only uses
-_Requests_ from the assigned _Bucket_ to propose new _Batches_. The _Bucket_ is defined in the `request` package.
+`./client ../sampleconfig/clientconfig/1peer-config.yml client`
 
-### Checkpointer
-Module responsible for creating checkpoints of the log. The _Checkpointer_ listens to the _Manager_, which notifies the
-_Checkpointer_ about each _SN_ at which a checkpoint should occur. The _Checkpointer_ triggers a separate instance of
-the checkpointing protocol for each such _SN_. When a checkpoint is stable, the _Checkpointer_ submits it to the _Log_.
-Defined in the `checkpointer` package.
+**IMPORTANT**: Client processes finish according to their configuration parameters (see details below), server processes must be killed manually.
 
-### Entry
-One element of the _Log_. It contains a _sequence number_ (_SN_) defining its position in the _Log_ and a _Batch_ of
-_Requests_. Defined in the `log` package.
+### Running with a custom configuration
 
-### Log
-A sequence of _Entries_ replicated by the peers. The `log` package implements this abstraction and all related
-functionality.
+Change working directory to `/opt/gopath/src/github.com/IBM/mirbft/deployment`
 
-### Manager
-Module orchestrating all components of the ordering service implementation. The _Manager_ observes the _Log_, issues
-_Segments_ and triggers the _Checkpointer_. It maintains a _watermark window_ into which all the issued _Segments_ must
-fall. The decisions of the _Manager_ must be consistent across all peers. Defined in the `manager` package.
+Edit `config-file-templates/server-config.yml` and  `config-file-templates/client-config.yml` for server, client configuration respectively (see details below).
+ 
+**IMPORTANT**: Leave fields in block letters untouched, they are automatically replaced by `config-gen.sh`.
 
-### Orderer
-Module implementing the actual ordering of _Batches_, i.e., committing new _Entries_ to the _Log_.
-The _Orderer_ listens to the _Manager_ for new _Segments_. Whenever the _Manager_ issues a new _Segment_, the _Orderer_
-creates a new instance of the ordering protocol that proposes and agrees on _Request_ _Batches_, one for each _SN_ that
-is part of the _Segment_. When a _Batch_ has been agreed upon for a particular _SN_, the _Orderer_ commits the
-(_SN_, _Batch_) pair as an _Entry_ to the _Log_. Defined in the `orderer` package.
+Run `config-gen.sh` to generate certificates and configuration files:
 
-### Request
-Opaque client data. Each _Request_ deterministically maps to a _Bucket_. Defined in the `request` package.
+`./config-gen.sh -l N C`
+* `-l`: a flag for generating a local configuration using the loopback address as ip for servers and clients
+* `N`: number of server
+* `C`: number of clients
 
-### Segment
-Part of the _Log_ ,i.e., a subset of (not necessarily contiguous) _SNs_, ordered independently by an _Orderer_.
-Segments are disjoint. No _SN_ can appear in more than one single _Segment_. The _Segment_ data structure (defined in
-the `manager` package) completely describes an instance of the ordering protocol: the _SNs_ it is responsible for, the
-sequence of leaders, the set of followers, the assigned _Bucket_, as well as information on when it is safe to start
-ordering it.
+On each server:
 
-### Sequence number (SN)
-32-bit integer referencing a particilar position of the _Log_.
+`cd /opt/gopath/src/github.com/IBM/mirbft/server`
 
-### Watermark window
-A range of _SNs_ for which _Entries_ can be proposed. The _watermark window_ starts at the last stable checkpoint and
-has a certain length that is a system parameter.
+`./server ../deployment/config/serverconfig/config_server$id.yml server$id 2>&1 | tee server-$id.out` where `$id` is `1..N`.
 
+The command writes the logs of the server to a `server-$id.out` file.
+
+On each client:
+
+`cd /opt/gopath/src/github.com/IBM/mirbft/client`
+
+`./client ../deployment/config/clientconfig/config_client$id.yml client$id` where `$id` is `1..C`.
+
+
+## Remote Deployment
+Change working directory to `/opt/gopath/src/github.com/IBM/mirbft/deployment`
+
+Add information for your cloud setup `cloud-instance.info` file.
+ 
+Each line must have the following format:
+
+``machine-identifier public-ip private-ip``.
+* `machine-identifier`: should have the format `server-x` or `client-x` respectively, where `x` some counter/id. 
+* If the machine has only one `ip` address use the same in both columns.
+
+Edit `vars.sh` file:
+* `ssh_user`: the user on the remote machines
+* `private_key_file`: the absolute path to a private key tha gives ssh access to `ssh_user@public-ip` for each machine.
+ 
+Run `./deploy.sh` <br />
+This copies and runs `install.sh` and `clone.sh` on each client and server machine to install requirements, clone the repository and install server and client executables.
+
+The `deploy.sh` script has one option/flag:
+`-p` or `--pull-only` does not re-install requirements, simply pulls changes from this repository and builds again the binaries
+
+Edit parameters in `deployment/config-file-templates/server-config.yml` and `deployment/config-file-templates/client-config.yml` (see details below).
+
+**IMPORTANT**: Leave fields in block letters untouched, they are automatically replaced by `config-gen.sh`.
+ 
+Run `config-gen.sh` to generate certificates, configuration files and copy them to server and client machines. The script has two flags:
+* `-c` or `--config-only`: generates and copies only configuration files, not certificates.
+* `-l` or `--local`: instead of copying the certificates and configuration files to a remote machine, it creates a `deployment/config` directory and copies the files there to facilitate a local deployment.
+ 
+**IMPORTANT**: The scripts assume all machines have the same user and the user is in the `sudo` group without password for `sudo` commands.
+
+Run `run.sh`. The script:
+* Kills any previously running experiment.
+* Starts servers and clients on the remote machines as defined in`cloud-instance.info`.
+* Periodically checks if the experiment has finished.
+* Creates an `experiment-output` directory and fetches the log and trace files of the experiment in it. 
+* Runs the performance evaluation tool (see details below) for the experiment. Note that the tool, when called in the `run.sh` script, does not truncate the data and might report latency and throughput affected by thr rump up and close down pediods.
+See details below on how to truncate.
+
+**IMPORTANT**: If there are already files in `experiment-output` they will be overwritten.
+
+## Configuration details 
+### Server configuration
+
+Each server (node) has:
+ * 2 IPs: `ip-public`, `ip-private`.
+    * `ip-public`: the ip used by clients to submit requests.
+    * `ip-private`: the ip used for node-to-node communication.
+ * and id from `0` to `N-1`, where `N` the number of servers.
+ * a private key: `server.key`
+ * a certificate: `server.pem`
+ * 2 listening ports: `server-to-server-port`, `server-to-client-port` such that `server-to-client-port`=`server-to-server-port+2`
+ 
+ Comments in `/opt/gopath/src/github.com/IBM/mirbft/sampleconfig/serverconfig/config*.yml` files describe how to configure a server.
+ 
+ Please bare in mind:
+ 
+ * `signatureVerification`: must be true to enable client authentication.
+ * `sigSharding`: must be true to enable signature verification sharding (SVS). Mir by default is considered to have SVS.
+ * `payloadSharding`: must be true to enable light total order broadcast (LTO) optimization.
+ * `watermarkDist`: should be greater than or equal to `checkpointDist`.
+ * `watermarkDist`: should be also greater than or equal to the number of nodes.
+ * `bucketRotationPeriod`: should be greater than or equal to `watermarkDist`.
+ * `clientWatermarkDist`: should be set to a very large value to allow few clients saturate throughput. Otherwise the setup would require many client machines.
+ * `serverConnectionBuffer`: might need to be increased for large deployments to allow enough time to all servers to connect to each other.
+
+ In `self` section:
+ * `listen` should always be set to `"0.0.0.0:server-to-server-port"`
+ 
+ In `servers` section:
+ * `certFiles` make sure they have the same order as the corresponding server’s `id`.
+ * `addresses`:
+    * make sure they have the same order as the corresponding server’s `id`. 
+    * use `ip-private` addresses.
+    * make sure the port number `server-to-server-port` matches the port number in the `self` section of each server.
+    
+#### Emulating PBFT
+To emulate PBFT we need to enforce a leaderset of size `1` and make epochs infinite.
+Apply the following changes to server configuration:
+* Set `maxLeaders` to `1`.
+* Set `bucketRotationPeriod` to a very high number, higher than the expected number of batches for the duration of your experiment.
+* Set `sigSharding` to `false` to disable the SVS optimization.
+ 
+#### Emulating Parallel PBFT
+To emulate parallel PBFT instances we need to disable the bucket redistribution.
+ * Set `bucketRotationPeriod` to a very high number, higher than the expected number of batches for the duration of your experiment.
+ * Set `sigSharding` to `false` to disable the SVS optimization.
+ 
+ This configuration is meaningful only for a fault-free execution and under the assumption that all the requests delivered are unique.
+ For evaluating the impact of duplicate requests, see the "Performance Evaluation" section below.
+
+### Client configuration
+ Comments in `/opt/gopath/src/github.com/IBM/mirbft/sampleconfig/clientconfig/*peer-config.yml` files describe how to configure a client.
+
+ In `servers` section:
+ * `addresses`:
+     * make sure they have the same order as the corresponding server’s `id`. 
+     * use `ip-public` addresses.
+     * make sure the port number `server-to-client-port` matches the port number in the `self` section of each server increased by `2`.
+ 
+ Client runtime can be tuned with `clientRunTime` and `requestsPerClient` parameters in client configuration.
+ *  `requestsPerClient`: The total number of requests a client process submits.
+ *  `clientRunTime`: A client process is killed after `clientRunTime` milliseconds, regardless if `requestsPerClient` requests are submitted. 
+
+
+## Performance Evaluation
+
+### System requirements for reproducing results from [Mir-BFT](https://arxiv.org/abs/1906.05552) paper
+The evaluation was run on dedicated virtual machines:
+* 4-100 servers (Mir-BFT nodes) machines
+* 16 client machines
+
+Clients and servers are located on different virtual machines. 
+
+Each machine (server, client):
+* 32 vCPUs
+* 32 GB memory
+* 2 network interfaces (public & private) each 1 Gbps up and down
+* 100 GB disk 
+* OS: Ubuntu 18.04 
+
+### Running the evaluation
+
+The following steps need to be followed for each experiment run:
+
+1. Add the servers and clients of the experiment  in `/opt/gopath/src/github.com/IBM/mirbft/deployment/cloud-instance.info`.
+    * If the experiment is run locally, skip this step.
+2. Edit the experiment specific parameters in configuration template files under `deployment/config-file-templates`
+3. Run `config-gen.sh` to generate TLS certificates and configuration files for servers and clients.
+    * If you did not change the set of servers and clients run the script with `-c` option to avoid re-generating and copying the certificates.
+    * If you run the experiment locally run the script with `-l`, providing also the number of servers and clients, as described above.
+4. Run the experiment with `run.sh`, see details above.
+5. Use the performance evaluation tool to parse the log and trc files and get performance evaluation results (see details below).
+ 
+### Experiment duration:
+Experiments where performed for minutes (1-2 minutes) or for for few (1-4) million client requests in total.
+
+### Latency-Throughput plots
+ Progressively increase load from clients (i.e,. in every subsequent run increase the load from clients) by increasing `requestRate` and `parallelism` until the throughput of the system stops increasing and latency increases significantly.
+
+### Scalability plots
+For each number of nodes `N` run a Latency-Throughput plot and peak the maximum throughput.
+
+### Experiments with faults
+Configure the servers with the parameters in `Byzantine behavior` section of the configuration.
+* To emulate straggler behavior set `ByzantineDelay` to a non-zero value, smaller than `epochTimeoutNsec`.
+* To emulate crash faults set `ByzantineDelay` to a large value, greater than `epochTimeoutNsec`.
+* To emulate censoring set `censoring` to a non-zero percentage.
+
+**NOTE:** The current code version does not implement state-transfer. Therefore, some executions with crash faults get stuck.
+
+### Simulating protocols  without duplication prevention
+In `Byzantine behavior` section, set `byzantineDuplication` to true.
+
+### Performance Evaluation Tool
+Performance evaluation metrics *throughput* and *latency* can be calculated with the `/opt/gopath/src/github.com/IBM/mirbft/tools/perf-eval.py` with the logs generated by the `/opt/gopath/src/github.com/IBM/mirbft/server/server` and traces generated by the `/opt/gopath/src/github.com/IBM/mirbft/client/client` binaries.
+
+With /opt/gopath/src/github.com/IBM/mirbft as working directory, the script should be called as follows:
+`python2 tools/perf-eval.py n m [path/to/server-1.out ... path/to/server-m.out] [path/to/client-001.trc ... path/to/client-m.trc] x y`
+* `n`: the number of server log file
+* `m`: the number of client trace files
+* `[path/to/server-1.out ... path/to/server-m.out]`: list of server *log* file paths
+* `[path/to/client-001.trc ... path/to/client-m.trc]`: list of client *trace* file paths
+* `x`: number of requests to ignore at the beginning of the experiment for throughput calculation
+* `y`: number of requests to ignore at the end of the experiment for throughput calculation
+
+The output of the script is: 
+```$xslt
+Average end to end latency: #### ms
+Average request rate per client: #### r/s
+Throughput: #### r/s
+Requests: ####
+```
+Moreover the script generates a file `latency.out` with latency CDF.
+
+**NOTE:** Unlike in the paper, the current code implementation supports responses to the clients, so as to easier automate the deployment.
+The latency measured here is, therefore, end-to-end: from the client request submission until the client receives enough responses inficating that the request is delivered.
+Since both data points are measured on the same machine, there is no need to synchronize server and client clocks, unlike what the paper mentions.
+
+**IMPORTANT: The evaluation script works only with python 2**
+
+### Plotting the data
+
+Please see detailed instructions in `plots/README.md`

@@ -1,16 +1,18 @@
-// Copyright 2022 IBM Corp. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+Copyright IBM Corp. 2021 All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+		 http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 
 package crypto
 
@@ -26,6 +28,17 @@ import (
 
 type ECDSASignature struct {
 	R, S *big.Int
+}
+
+//Generate public and private client key
+func ECDSAKeyPair() (*ecdsa.PublicKey, *ecdsa.PrivateKey, error) {
+	reader := rand.Reader
+	sk, err := ecdsa.GenerateKey(elliptic.P256(), reader)
+	if err != nil {
+		return nil, nil, err
+	}
+	pk := &sk.PublicKey
+	return pk, sk, nil
 }
 
 func ECDSASignatureToBytes(r, s *big.Int) ([]byte, error) {
@@ -76,15 +89,4 @@ func VerifyECDSASignature(pk *ecdsa.PublicKey, hash []byte, signature []byte) er
 		return fmt.Errorf("signature verification failed")
 	}
 	return nil
-}
-
-func GenerateECDSAKeyPair() (*ecdsa.PrivateKey, *ecdsa.PublicKey, error) {
-	// TODO: No clue which curve to use, picked P256 because it was in the documentation example.
-	//       Check whether this is OK.
-	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return privKey, &privKey.PublicKey, nil
 }
